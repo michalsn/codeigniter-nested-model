@@ -1,6 +1,6 @@
 # CodeIgniter Nested Model
 
-Dead simple nested model relations for CodeIgniter 4 framework.
+Dead simple nested model relations for CodeIgniter 4 framework. Relations are eager loaded. Each relation is one additional database query.
 
 ### Example
 
