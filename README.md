@@ -21,9 +21,9 @@ class UserModel extends Model
     
     protected $relations = [
         // one avatar - relation type, model, foreign key, local key
-        'avatar' => ['hasOne', AvatarModel::class]//, 'user_id', 'id'],
+        'avatar' => ['hasOne', AvatarModel::class], //'user_id', 'id'],
         // many social links - relation type, model, foreign key, local key
-        'links'  => ['hasMany', LinkModel::class]//, 'user_id', 'id'],
+        'links'  => ['hasMany', LinkModel::class], //'user_id', 'id'],
     ];
 }
 ```
