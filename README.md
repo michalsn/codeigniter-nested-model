@@ -2,6 +2,9 @@
 
 Dead simple nested model relations for CodeIgniter 4 framework. Relations are eager loaded. Each relation is one additional database query.
 
+> [!WARNING]
+> This project is experimental.
+
 ### Example
 
 ```php
