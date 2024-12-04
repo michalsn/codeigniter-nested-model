@@ -8,5 +8,5 @@ enum RelationTypes
 {
     case hasOne;
     case hasMany;
-    case belongTo;
+    case belongsTo;
 }

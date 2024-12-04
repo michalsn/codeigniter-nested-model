@@ -79,4 +79,12 @@ class UserModel extends Model
     {
         return $this->hasOne(PostModel::class)->ofMany('rating', OrderTypes::DESC);
     }
+
+    public function missingReturnType()
+    {
+    }
+
+    public function incorrectReturnType(): string
+    {
+    }
 }

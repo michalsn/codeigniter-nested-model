@@ -9,6 +9,7 @@ use CodeIgniter\Model;
 use InvalidArgumentException;
 use LogicException;
 use Michalsn\CodeIgniterNestedModel\Enums\RelationTypes;
+use Michalsn\CodeIgniterNestedModel\Exceptions\NestedModelException;
 use Michalsn\CodeIgniterNestedModel\Relation;
 use Michalsn\CodeIgniterNestedModel\With;
 use ReflectionClass;
@@ -43,7 +44,7 @@ trait HasRelations
             [$relation, $name] = explode('.', $relation, 2);
 
             if (! isset($this->relations[$relation])) {
-                throw new InvalidArgumentException(sprintf('Parent relation "%s" has not been declared yet.', $relation));
+                throw NestedModelException::forParentRelationNotDeclared($relation);
             }
 
             $this->relations[$relation]->setWith(new With($name, $closure));
@@ -65,18 +66,18 @@ trait HasRelations
     private function checkReturnType(string $methodName): bool
     {
         if (! method_exists($this, $methodName)) {
-            throw new InvalidArgumentException(sprintf('Relation "%s" is not defined.', $methodName));
+            throw NestedModelException::forRelationNotDefined($methodName);
         }
 
         $reflectionMethod = new ReflectionMethod($this, $methodName);
         $returnType       = $reflectionMethod->getReturnType();
 
         if (! $returnType instanceof ReflectionNamedType) {
-            throw new LogicException(sprintf('Method "%s()" is missing a required return type declaration.', $methodName));
+            throw NestedModelException::forMissingReturnType($methodName);
         }
 
         if ($returnType->getName() !== Relation::class) {
-            throw new UnexpectedValueException(sprintf('Method "%s()" returned an incorrect type.', $methodName));
+            throw NestedModelException::forIncorrectReturnType($methodName);
         }
 
         return true;
@@ -97,8 +98,8 @@ trait HasRelations
         $this->relations[$relation] = new Relation(
             $relationType,
             $model,
-            $foreignKey ?? ($relationType === RelationTypes::belongTo ? $this->relationsGetBelongForeignKey($model) : $this->relationsGetHasForeignKey()),
-            $primaryKey ?? ($relationType === RelationTypes::belongTo ? $this->relationsGetBelongPrimaryKey($model) : $this->relationsGetHasPrimaryKey())
+            $foreignKey ?? ($relationType === RelationTypes::belongsTo ? $this->relationsGetBelongForeignKey($model) : $this->relationsGetHasForeignKey()),
+            $primaryKey ?? ($relationType === RelationTypes::belongsTo ? $this->relationsGetBelongPrimaryKey($model) : $this->relationsGetHasPrimaryKey())
         );
 
         return $this->relations[$relation];
@@ -123,9 +124,9 @@ trait HasRelations
     /**
      * @throws ReflectionException
      */
-    protected function belongTo(Model|string $model, ?string $primaryKey = null, ?string $foreignKey = null): Relation
+    protected function belongsTo(Model|string $model, ?string $primaryKey = null, ?string $foreignKey = null): Relation
     {
-        return $this->addRelation($model, RelationTypes::belongTo, $foreignKey, $primaryKey);
+        return $this->addRelation($model, RelationTypes::belongsTo, $foreignKey, $primaryKey);
     }
 
     /*
@@ -177,6 +178,7 @@ trait HasRelations
             $this->relations[$relation]->setThrough($through, $throughForeignKey, $throughPrimaryKey);
         }
     */
+
     /**
      * @throws ReflectionException
      */
@@ -387,7 +389,7 @@ trait HasRelations
 
         $relation->applyConditions();
 
-        return in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongTo], true) ?
+        return in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true) ?
             $query->first() :
             $query->findAll();
     }
@@ -431,7 +433,7 @@ trait HasRelations
 
         $relationData = [];
 
-        if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongTo], true)) {
+        if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true)) {
             foreach ($results as $row) {
                 $relationData[$this->tempReturnType === 'array' ? $row[$relation->foreignKey] : $row->{$relation->foreignKey}] = $row;
             }

@@ -41,7 +41,7 @@ trait HasLazyRelations
 
         $relation->model->where($relation->foreignKey, $this->attributes[$relation->primaryKey]);
 
-        if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongTo], true)) {
+        if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true)) {
             $this->attributes[$name] = $relation->model->first();
         } else {
             $this->attributes[$name] = $relation->model->findAll();

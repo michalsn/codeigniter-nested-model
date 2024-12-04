@@ -8,6 +8,7 @@ use CodeIgniter\Entity\Entity;
 use CodeIgniter\Model;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\DatabaseTestTrait;
+use Michalsn\CodeIgniterNestedModel\Exceptions\NestedModelException;
 use Tests\Support\Database\Seeds\SeedTests;
 use Tests\Support\Entities\Post;
 use Tests\Support\Entities\Profile;
@@ -30,6 +31,46 @@ final class ModelTest extends CIUnitTestCase
     {
         $model = model(UserModel::class);
         $this->assertInstanceOf(UserModel::class, $model);
+    }
+
+    public function testRelationNotDefined(): void
+    {
+        $this->expectException(NestedModelException::class);
+        $this->expectExceptionMessage('Relation "notExist" is not defined.');
+
+        model(UserModel::class)->with('notExist')->find(1);
+    }
+
+    public function testMissingReturnType(): void
+    {
+        $this->expectException(NestedModelException::class);
+        $this->expectExceptionMessage('Method "missingReturnType()" is missing a required return type declaration.');
+
+        model(UserModel::class)->with('missingReturnType')->find(1);
+    }
+
+    public function testIncorrectReturnType(): void
+    {
+        $this->expectException(NestedModelException::class);
+        $this->expectExceptionMessage('Method "incorrectReturnType()" returned an incorrect type.');
+
+        model(UserModel::class)->with('incorrectReturnType')->find(1);
+    }
+
+    public function testParentRelationNotDeclared(): void
+    {
+        $this->expectException(NestedModelException::class);
+        $this->expectExceptionMessage('Parent relation "posts" has not been declared yet.');
+
+        model(UserModel::class)->with('posts.something')->find(1);
+    }
+
+    public function testMethodNotSupported(): void
+    {
+        $this->expectException(NestedModelException::class);
+        $this->expectExceptionMessage('This method is not supported for the "hasMany" relation.');
+
+        model(UserModel::class)->posts()->latestOfMany();
     }
 
     public function testFindHasOne()
@@ -135,7 +176,7 @@ final class ModelTest extends CIUnitTestCase
         $this->assertSame('Title 1', $user->posts[0]['title']);
     }
 
-    public function testFindBelongTo()
+    public function testFindbelongsTo()
     {
         // Load normal model
         $post = model(PostModel::class)->find(1);

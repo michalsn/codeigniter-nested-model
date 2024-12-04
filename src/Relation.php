@@ -10,6 +10,7 @@ use CodeIgniter\Entity\Entity;
 use CodeIgniter\Model;
 use Michalsn\CodeIgniterNestedModel\Enums\OrderTypes;
 use Michalsn\CodeIgniterNestedModel\Enums\RelationTypes;
+use Michalsn\CodeIgniterNestedModel\Exceptions\NestedModelException;
 use ReflectionObject;
 
 class Relation
@@ -126,7 +127,7 @@ class Relation
     private function setOrder(string $field, OrderTypes $order): void
     {
         if ($this->type !== RelationTypes::hasOne) {
-            throw new BadMethodCallException("This method is not supported for the '{$this->type->name}' relation.");
+            throw NestedModelException::forMethodNotSupported($this->type->name);
         }
 
         $this->model->orderBy($field, $order->value);

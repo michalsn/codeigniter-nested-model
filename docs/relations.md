@@ -93,7 +93,7 @@ class PostModel extends Model
 
     public function user(): Relation
     {
-        return $this->belongTo(UserModel::class);
+        return $this->belongsTo(UserModel::class);
     }
 }
 ```
