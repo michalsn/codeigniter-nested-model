@@ -16,7 +16,17 @@ class Relations extends Migration
                 'auto_increment' => true,
                 'null'           => false,
             ],
-            'username' => [
+            'street' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => false,
+            ],
+            'city' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => false,
+            ],
+            'country' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '100',
                 'null'       => false,
@@ -31,6 +41,102 @@ class Relations extends Migration
             ],
         ]);
         $this->forge->addKey('id', true);
+        $this->forge->createTable('addresses');
+
+        $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+                'null'           => false,
+            ],
+            'name' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => false,
+            ],
+            'address_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => false,
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+        ]);
+        $this->forge->addKey('id', true);
+        $this->forge->addForeignKey('address_id', 'addresses', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->createTable('companies');
+
+        $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+                'null'           => false,
+            ],
+            'name' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => false,
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+        ]);
+        $this->forge->addKey('id', true);
+        $this->forge->createTable('countries');
+
+        $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+                'null'           => false,
+            ],
+            'username' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => false,
+            ],
+            'company_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => false,
+            ],
+            'country_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => false,
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+        ]);
+        $this->forge->addKey('id', true);
+        $this->forge->addForeignKey('company_id', 'companies', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('country_id', 'countries', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('users');
 
         $this->forge->addField([
@@ -138,5 +244,8 @@ class Relations extends Migration
         $this->forge->dropTable('posts');
         $this->forge->dropTable('profiles');
         $this->forge->dropTable('users');
+        $this->forge->dropTable('countries');
+        $this->forge->dropTable('companies');
+        $this->forge->dropTable('addresses');
     }
 }

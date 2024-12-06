@@ -5,22 +5,20 @@ declare(strict_types=1);
 namespace Tests\Support\Models;
 
 use CodeIgniter\Model;
-use Michalsn\CodeIgniterNestedModel\Enums\OrderTypes;
-use Michalsn\CodeIgniterNestedModel\Relation;
 use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
-use Tests\Support\Entities\User;
+use Tests\Support\Entities\Company;
 
-class UserModel extends Model
+class CompanyModel extends Model
 {
     use HasRelations;
 
-    protected $table                  = 'users';
+    protected $table                  = 'companies';
     protected $primaryKey             = 'id';
     protected $useAutoIncrement       = true;
-    protected $returnType             = User::class;
+    protected $returnType             = Company::class;
     protected $useSoftDeletes         = false;
     protected $protectFields          = true;
-    protected $allowedFields          = ['username', 'company_id', 'country_id'];
+    protected $allowedFields          = ['address_id', 'name'];
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
     protected array $casts            = [];
@@ -53,43 +51,5 @@ class UserModel extends Model
     protected function initialize(): void
     {
         $this->initRelations();
-    }
-
-    public function profile(): Relation
-    {
-        return $this->hasOne(ProfileModel::class);
-    }
-
-    public function posts(): Relation
-    {
-        return $this->hasMany(PostModel::class);
-    }
-
-    public function latestPost(): Relation
-    {
-        return $this->hasOne(PostModel::class)->latestOfMany();
-    }
-
-    public function oldestPost(): Relation
-    {
-        return $this->hasOne(PostModel::class)->oldestOfMany();
-    }
-
-    public function bestPost(): Relation
-    {
-        return $this->hasOne(PostModel::class)->ofMany('rating', OrderTypes::DESC);
-    }
-
-    public function address(): Relation
-    {
-        return $this->hasOneThrough(AddressModel::class, CompanyModel::class);
-    }
-    
-    public function missingReturnType()
-    {
-    }
-
-    public function incorrectReturnType(): void
-    {
     }
 }

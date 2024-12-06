@@ -5,6 +5,9 @@ namespace Tests\Support\Database\Seeds;
 use CodeIgniter\Database\Seeder;
 use CodeIgniter\I18n\Time;
 use ReflectionException;
+use Tests\Support\Models\AddressModel;
+use Tests\Support\Models\CompanyModel;
+use Tests\Support\Models\CountryModel;
 use Tests\Support\Models\UserModel;
 
 class SeedTests extends Seeder
@@ -14,10 +17,48 @@ class SeedTests extends Seeder
      */
     public function run()
     {
+        $addresses = [
+            [
+                'street'  => '1943 Ashcraft Court',
+                'city'    => 'San Diego',
+                'country' => 'United States',
+            ],
+            [
+                'street'  => '4886 Augusta Park',
+                'city'    => 'West Virginia',
+                'country' => 'United States',
+            ],
+        ];
+        model(AddressModel::class)->insertBatch($addresses);
+
+        $companies = [
+            [
+                'name'       => 'Sample company 1',
+                'address_id' => '1',
+            ],
+            [
+                'name'       => 'Sample company 2',
+                'address_id' => '2',
+            ],
+        ];
+        model(CompanyModel::class)->insertBatch($companies);
+
+        $countries = [
+            [
+                'name' => 'United States',
+            ],
+            [
+                'name' => 'Ireland',
+            ],
+        ];
+        model(CountryModel::class)->insertBatch($countries);
+
         $data = [
             [
-                'username' => 'Test User 1',
-                'profile'  => [
+                'username'   => 'Test User 1',
+                'company_id' => '1',
+                'country_id' => '1',
+                'profile'    => [
                     'country' => 'United States',
                 ],
                 'posts' => [
@@ -39,8 +80,10 @@ class SeedTests extends Seeder
                 ],
             ],
             [
-                'username' => 'Test User 2',
-                'profile'  => [
+                'username'   => 'Test User 2',
+                'company_id' => '2',
+                'country_id' => '2',
+                'profile'    => [
                     'country' => 'Spain',
                 ],
                 'posts' => [
@@ -72,7 +115,11 @@ class SeedTests extends Seeder
         $model = model(UserModel::class);
 
         foreach ($data as $item) {
-            $model->with('profile')->with('posts')->with('posts.comments')->insert($item);
+            $model
+                ->with('profile')
+                ->with('posts')
+                ->with('posts.comments')
+                ->insert($item);
         }
 
         // Special Posts for User 1

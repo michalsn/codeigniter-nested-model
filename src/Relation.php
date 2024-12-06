@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Michalsn\CodeIgniterNestedModel;
 
-use BadMethodCallException;
 use Closure;
 use CodeIgniter\Entity\Entity;
 use CodeIgniter\Model;
@@ -17,6 +16,7 @@ class Relation
 {
     private ?Closure $conditions = null;
     private ?OfMany $ofMany      = null;
+    private ?Through $through    = null;
 
     /**
      * @var list<With>
@@ -98,7 +98,63 @@ class Relation
         return $this;
     }
 
-    public function getOfMany(): OfMany
+    public function setThrough(Model $model, ?string $foreignKey = null, ?string $primaryKey = null): static
+    {
+        $this->through = new Through(
+            $model,
+            $foreignKey ?? get_foreign_key($model),
+            $primaryKey ?? get_primary_key($model)
+        );
+
+        return $this;
+    }
+
+    public function hasThrough(): bool
+    {
+        return $this->through !== null;
+    }
+
+    public function applyThrough(array $id, string $primaryKey): static
+    {
+        if ($this->through === null) {
+            $this->model->whereIn(
+                sprintf(
+                    '%s.%s',
+                    $this->model->getTable(),
+                    $this->foreignKey
+                ),
+                $id
+            );
+
+            return $this;
+        }
+
+        $this->model
+            ->select(sprintf('%s.*', $this->model->getTable()))
+            ->join(
+                $this->through->model->getTable(),
+                sprintf(
+                    '%s.%s = %s.%s',
+                    $this->through->model->getTable(),
+                    $this->through->foreignKey,
+                    $this->model->getTable(),
+                    $this->primaryKey
+                ),
+                'LEFT'
+            )
+            ->whereIn(
+                sprintf(
+                    '%s.%s',
+                    $this->through->model->getTable(),
+                    $primaryKey
+                ),
+                $id
+            );
+
+        return $this;
+    }
+
+    public function getOfMany(): ?OfMany
     {
         return $this->ofMany;
     }

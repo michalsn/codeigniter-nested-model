@@ -15,7 +15,7 @@ composer require michalsn/codeigniter-nested-model
 
 In the example below we will assume that files from this project will be located in `app/ThirdParty/nested-model` directory.
 
-Download this project and then enable it by editing the `app/Config/Autoload.php` file and adding the `Michalsn\CodeIgniterNestedModel` namespace to the `$psr4` array, like in the below example:
+Download this project and then enable it by editing the `app/Config/Autoload.php` file and adding the `Michalsn\CodeIgniterNestedModel` namespace to the `$psr4` array. You also have to add `Common.php` to the `$files` array, like in the below example:
 
 ```php
 <?php
@@ -28,4 +28,11 @@ public $psr4 = [
 ];
 
 // ...
+
+public $files = [
+    APPPATH . 'ThirdParty/nested-model/src/Common.php',
+];
+
+// ...
+
 ```

@@ -6,7 +6,6 @@ namespace Michalsn\CodeIgniterNestedModel\Traits;
 
 use Closure;
 use CodeIgniter\Model;
-use InvalidArgumentException;
 use LogicException;
 use Michalsn\CodeIgniterNestedModel\Enums\RelationTypes;
 use Michalsn\CodeIgniterNestedModel\Exceptions\NestedModelException;
@@ -16,8 +15,6 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
-use ReflectionObject;
-use UnexpectedValueException;
 
 trait HasRelations
 {
@@ -91,17 +88,16 @@ trait HasRelations
         $relation              = $this->getInitialMethodName();
         $this->allowedFields[] = $relation;
 
-        if (! $model instanceof Model) {
-            $model = model($model);
-        }
+        $model = $this->getModelInstance($model);
 
         $this->relations[$relation] = new Relation(
             $relationType,
             $model,
-            $foreignKey ?? ($relationType === RelationTypes::belongsTo ? $this->relationsGetBelongForeignKey($model) : $this->relationsGetHasForeignKey()),
-            $primaryKey ?? ($relationType === RelationTypes::belongsTo ? $this->relationsGetBelongPrimaryKey($model) : $this->relationsGetHasPrimaryKey())
+            $foreignKey ?? ($relationType === RelationTypes::belongsTo ? get_primary_key($model) : get_foreign_key($this)),
+            $primaryKey ?? ($relationType === RelationTypes::belongsTo ? get_foreign_key($model) : get_primary_key($this))
         );
 
+        // dd($this->relations[$relation]->foreignKey, $this->relations[$relation]->primaryKey);
         return $this->relations[$relation];
     }
 
@@ -129,55 +125,52 @@ trait HasRelations
         return $this->addRelation($model, RelationTypes::belongsTo, $foreignKey, $primaryKey);
     }
 
-    /*
-        protected function hasManyThrough(Model|string $model, Model|string $through, ?string $foreignKey = null, ?string $primaryKey = null, ?string $throughForeignKey = null, ?string $throughPrimaryKey = null): void
-        {
-            $relation = $this->relation ?? $this->getInitialMethodName();
+    /**
+     * @throws ReflectionException
+     */
+    protected function hasOneThrough(
+        Model|string $model,
+        Model|string $through,
+        ?string $throughForeignKey = null,
+        ?string $foreignKey = null,
+        ?string $throughPrimaryKey = null,
+        ?string $primaryKey = null
+    ): Relation {
+        $model   = $this->getModelInstance($model);
+        $through = $this->getModelInstance($through);
 
-            $this->allowedFields[] = $relation;
+        $foreignKey ??= get_foreign_key($through);
+        $throughForeignKey ??= get_foreign_key($model);
 
-            if (! $model instanceof Model) {
-                $model = model($model);
-            }
+        return $this->addRelation($model, RelationTypes::hasOne, $foreignKey, $primaryKey)
+            ->setThrough($through, $throughForeignKey, $throughPrimaryKey);
+    }
 
-            if (! $through instanceof Model) {
-                $through = model($through);
-            }
+    /**
+     * @throws ReflectionException
+     */
+    protected function hasManyThrough(
+        Model|string $model,
+        Model|string $through,
+        ?string $throughForeignKey = null,
+        ?string $foreignKey = null,
+        ?string $throughPrimaryKey = null,
+        ?string $primaryKey = null
+    ): Relation {
+        $model   = $this->getModelInstance($model);
+        $through = $this->getModelInstance($through);
 
-            $this->relations[$relation] = new Relation(
-                RelationTypes::hasMany,
-                $model,
-                $foreignKey ?? $this->relationsGetHasForeignKey($model),
-                $primaryKey ?? $this->relationsGetHasPrimaryKey()
-            );
+        $foreignKey ??= get_foreign_key($through);
+        $throughForeignKey ??= get_foreign_key($model);
 
-            $this->relations[$relation]->setThrough($through, $throughForeignKey, $throughPrimaryKey);
-        }
+        return $this->addRelation($model, RelationTypes::hasMany, $foreignKey, $primaryKey)
+            ->setThrough($through, $throughForeignKey, $throughPrimaryKey);
+    }
 
-        protected function belongsToMany(Model|string $model, Model|string $through, ?string $foreignKey = null, ?string $primaryKey = null, ?string $throughForeignKey = null, ?string $throughPrimaryKey = null): void
-        {
-            $relation = $this->relation ?? $this->getInitialMethodName();
-
-            $this->allowedFields[] = $relation;
-
-            if (! $model instanceof Model) {
-                $model = model($model);
-            }
-
-            if (! $through instanceof Model) {
-                $through = model($through);
-            }
-
-            $this->relations[$relation] = new Relation(
-                RelationTypes::hasMany,
-                $model,
-                $foreignKey ?? $this->relationsGetHasForeignKey($model),
-                $primaryKey ?? $this->relationsGetHasPrimaryKey()
-            );
-
-            $this->relations[$relation]->setThrough($through, $throughForeignKey, $throughPrimaryKey);
-        }
-    */
+    private function getModelInstance(Model|string $model): Model
+    {
+        return $model instanceof Model ? $model : model($model);
+    }
 
     /**
      * @throws ReflectionException
@@ -207,44 +200,6 @@ trait HasRelations
         }
 
         throw new LogicException('No initial method with Relation return type found in the current class.');
-    }
-
-    private function relationsGetHasPrimaryKey(): string
-    {
-        return $this->primaryKey;
-    }
-
-    private function relationsGetHasForeignKey(): string
-    {
-        return singular($this->table) . '_' . $this->primaryKey;
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    private function relationsGetBelongPrimaryKey(Model $model): string
-    {
-        $refObj = new ReflectionObject($model);
-
-        $refProp = $refObj->getProperty('table');
-        $table   = $refProp->getValue($model);
-
-        $refProp    = $refObj->getProperty('primaryKey');
-        $primaryKey = $refProp->getValue($model);
-
-        return singular($table) . '_' . $primaryKey;
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    private function relationsGetBelongForeignKey(Model $model): string
-    {
-        $refObj = new ReflectionObject($model);
-
-        $refProp = $refObj->getProperty('primaryKey');
-
-        return $refProp->getValue($model);
     }
 
     /**
@@ -385,26 +340,29 @@ trait HasRelations
 
     protected function getDataForRelationById(int|string $id, Relation $relation)
     {
-        $query = $relation->applyWith()->model->where($relation->foreignKey, $id);
+        // $query = $relation->applyWith()->model->where($relation->foreignKey, $id);
 
-        $relation->applyConditions();
+        $relation->applyWith()->applyThrough([$id], $this->primaryKey)->applyConditions();
 
+        // dd($relation->model->getCompiledSelect());
         return in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true) ?
-            $query->first() :
-            $query->findAll();
+            $relation->model->first() :
+            $relation->model->findAll();
     }
 
     protected function getDataForRelationByIds(array $id, Relation $relation): array
     {
-        $query = $relation->applyWith()->model->whereIn(
-            sprintf('%s.%s', $relation->model->getTable(), $relation->foreignKey),
-            $id
-        );
+        //        $query = $relation->applyWith()->model->whereIn(
+        //            sprintf('%s.%s', $relation->model->getTable(), $relation->foreignKey),
+        //            $id
+        //        );
+        //
+        //        $relation->applyConditions();
 
-        $relation->applyConditions();
+        $relation->applyWith()->applyThrough($id, $this->primaryKey)->applyConditions();
 
         if ($relation->type === RelationTypes::hasOne && ($ofMany = $relation->getOfMany()) !== null) {
-            $results = $query
+            $results = $relation->model
                 ->select(sprintf('%s.*', $relation->model->getTable()))
                 ->join(
                     sprintf(
@@ -428,18 +386,19 @@ trait HasRelations
                 ->where('relation1.' . $relation->primaryKey, null)
                 ->findAll();
         } else {
-            $results = $query->findAll();
+            $results = $relation->model->findAll();
         }
 
         $relationData = [];
+        $key          = $relation->hasThrough() ? $relation->primaryKey : $relation->foreignKey;
 
         if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true)) {
             foreach ($results as $row) {
-                $relationData[$this->tempReturnType === 'array' ? $row[$relation->foreignKey] : $row->{$relation->foreignKey}] = $row;
+                $relationData[$this->tempReturnType === 'array' ? $row[$key] : $row->{$key}] = $row;
             }
         } else {
             foreach ($results as $row) {
-                $relationData[$this->tempReturnType === 'array' ? $row[$relation->foreignKey] : $row->{$relation->foreignKey}][] = $row;
+                $relationData[$this->tempReturnType === 'array' ? $row[$key] : $row->{$key}][] = $row;
             }
         }
 
