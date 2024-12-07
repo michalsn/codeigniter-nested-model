@@ -236,6 +236,92 @@ class Relations extends Migration
         $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('post_id', 'posts', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('comments');
+
+        $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+                'null'           => false,
+            ],
+            'firstname' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => false,
+            ],
+            'lastname' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => false,
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+        ]);
+        $this->forge->addKey('id', true);
+        $this->forge->createTable('students');
+
+        $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+                'null'           => false,
+            ],
+            'name' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => false,
+            ],
+            'total_hours' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '100',
+                'null'       => false,
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => false,
+            ],
+        ]);
+        $this->forge->addKey('id', true);
+        $this->forge->createTable('courses');
+
+        $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+                'null'           => false,
+            ],
+            'student_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => false,
+            ],
+            'course_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => false,
+            ],
+        ]);
+        $this->forge->addKey('id', true);
+        $this->forge->addForeignKey('student_id', 'students', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('course_id', 'courses', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->createTable('course_student');
     }
 
     public function down(): void
@@ -247,5 +333,9 @@ class Relations extends Migration
         $this->forge->dropTable('countries');
         $this->forge->dropTable('companies');
         $this->forge->dropTable('addresses');
+
+        $this->forge->dropTable('course_student');
+        $this->forge->dropTable('courses');
+        $this->forge->dropTable('students');
     }
 }

@@ -167,9 +167,31 @@ trait HasRelations
             ->setThrough($through, $throughForeignKey, $throughPrimaryKey);
     }
 
+    public function belongsToMany(Model|string $model, ?string $pivotTable = null, ?string $pivotForeignKey = null, ?string $pivotRelatedKey = null)
+    {
+        $model = $this->getModelInstance($model);
+
+        $pivotTable ??= $this->createPivotTableName($this->table, $model->getTable());
+        $pivotForeignKey ??= get_foreign_key($this);
+        $pivotRelatedKey ??= get_foreign_key($model);
+
+        return $this->addRelation($model, RelationTypes::belongsToMany)
+            ->setMany($pivotTable, $pivotForeignKey, $pivotRelatedKey);
+    }
+
     private function getModelInstance(Model|string $model): Model
     {
         return $model instanceof Model ? $model : model($model);
+    }
+
+    private function createPivotTableName($table1, $table2): string
+    {
+        $tables = [$table1, $table2];
+        sort($tables);
+
+        $tables = array_map('singular', $tables);
+
+        return implode('_', $tables);
     }
 
     /**
@@ -340,26 +362,18 @@ trait HasRelations
 
     protected function getDataForRelationById(int|string $id, Relation $relation)
     {
-        // $query = $relation->applyWith()->model->where($relation->foreignKey, $id);
+        $relation->applyWith()->applyRelation([$id], $this->primaryKey)->applyConditions();
 
-        $relation->applyWith()->applyThrough([$id], $this->primaryKey)->applyConditions();
-
-        // dd($relation->model->getCompiledSelect());
-        return in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true) ?
+        $results = in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true) ?
             $relation->model->first() :
             $relation->model->findAll();
+
+        return $relation->filterResults($results, $this->tempReturnType);
     }
 
     protected function getDataForRelationByIds(array $id, Relation $relation): array
     {
-        //        $query = $relation->applyWith()->model->whereIn(
-        //            sprintf('%s.%s', $relation->model->getTable(), $relation->foreignKey),
-        //            $id
-        //        );
-        //
-        //        $relation->applyConditions();
-
-        $relation->applyWith()->applyThrough($id, $this->primaryKey)->applyConditions();
+        $relation->applyWith()->applyRelation($id, $this->primaryKey)->applyConditions();
 
         if ($relation->type === RelationTypes::hasOne && ($ofMany = $relation->getOfMany()) !== null) {
             $results = $relation->model
@@ -398,7 +412,9 @@ trait HasRelations
             }
         } else {
             foreach ($results as $row) {
-                $relationData[$this->tempReturnType === 'array' ? $row[$key] : $row->{$key}][] = $row;
+                $arrayKey                  = $this->tempReturnType === 'array' ? $row[$key] : $row->{$key};
+                $row                       = $relation->filterResult($row, $this->tempReturnType);
+                $relationData[$arrayKey][] = $row;
             }
         }
 

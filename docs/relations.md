@@ -229,3 +229,67 @@ class CountryModel extends Model
     }
 }
 ```
+
+### Usage
+
+```php
+model(UserModel::class)->with('posts')->find(1);
+```
+
+## Many to many
+
+A `belongsToMany` relationship is used for many-to-many associations between two models. This relationship involves an intermediate pivot table that links records in one table to records in another.
+
+### Example
+
+Consider an application where:
+
+- *Students* can enroll in multiple *Courses*.
+- A *Course* can have multiple *Students*.
+
+Since both Students and Courses can be related to each other in many ways, we use a pivot table to manage this association.
+
+```php
+class StudentModel extends Model
+{
+    use HasRelations;
+
+    // ...
+
+    public function initialize()
+    {
+        $this->initRelations();
+    }
+
+    public function courses(): Relation
+    {
+        return $this->belongsToMany(CourseModel::class);
+    }
+}
+```
+```php
+class CourseModel extends Model
+{
+    use HasRelations;
+
+    // ...
+
+    public function initialize()
+    {
+        $this->initRelations();
+    }
+
+    public function students(): Relation
+    {
+        return $this->belongsToMany(StudentModel::class);
+    }
+}
+```
+
+### Usage
+
+```php
+model(StudentModel::class)->with('courses')->find(1);
+
+model(CourseModel::class)->with('students')->find(1);
+```

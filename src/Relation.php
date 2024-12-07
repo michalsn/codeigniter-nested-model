@@ -17,6 +17,7 @@ class Relation
     private ?Closure $conditions = null;
     private ?OfMany $ofMany      = null;
     private ?Through $through    = null;
+    private ?Many $many          = null;
 
     /**
      * @var list<With>
@@ -114,42 +115,92 @@ class Relation
         return $this->through !== null;
     }
 
-    public function applyThrough(array $id, string $primaryKey): static
+    public function setMany(string $pivotTable, string $pivotForeignKey, string $pivotRelatedKey): static
     {
-        if ($this->through === null) {
-            $this->model->whereIn(
-                sprintf(
-                    '%s.%s',
-                    $this->model->getTable(),
-                    $this->foreignKey
-                ),
-                $id
-            );
+        $this->many = new Many($pivotTable, $pivotForeignKey, $pivotRelatedKey);
+
+        return $this;
+    }
+
+    public function hasMany(): bool
+    {
+        return $this->many !== null;
+    }
+
+    public function getMany(): ?Many
+    {
+        return $this->many;
+    }
+
+    public function applyRelation(array $id, string $primaryKey): static
+    {
+        if ($this->through !== null) {
+            $this->model
+                ->select(sprintf('%s.*', $this->model->getTable()))
+                ->join(
+                    $this->through->model->getTable(),
+                    sprintf(
+                        '%s.%s = %s.%s',
+                        $this->through->model->getTable(),
+                        $this->through->foreignKey,
+                        $this->model->getTable(),
+                        $this->primaryKey
+                    ),
+                    'LEFT'
+                )
+                ->whereIn(
+                    sprintf(
+                        '%s.%s',
+                        $this->through->model->getTable(),
+                        $primaryKey
+                    ),
+                    $id
+                );
 
             return $this;
         }
 
-        $this->model
-            ->select(sprintf('%s.*', $this->model->getTable()))
-            ->join(
-                $this->through->model->getTable(),
-                sprintf(
-                    '%s.%s = %s.%s',
-                    $this->through->model->getTable(),
-                    $this->through->foreignKey,
-                    $this->model->getTable(),
-                    $this->primaryKey
-                ),
-                'LEFT'
-            )
-            ->whereIn(
-                sprintf(
-                    '%s.%s',
-                    $this->through->model->getTable(),
-                    $primaryKey
-                ),
-                $id
-            );
+        if ($this->many !== null) {
+            $this->model
+                ->select(
+                    sprintf(
+                        '%s.*, %s.%s',
+                        $this->model->getTable(),
+                        $this->many->pivotTable,
+                        $this->many->pivotForeignKey
+                    )
+                )
+                ->join(
+                    $this->many->pivotTable,
+                    sprintf(
+                        '%s.%s = %s.%s',
+                        $this->many->pivotTable,
+                        $this->many->pivotRelatedKey,
+                        $this->model->getTable(),
+                        get_primary_key($this->model)
+                    ),
+                    'LEFT'
+                )
+                ->whereIn(
+                    sprintf(
+                        '%s.%s',
+                        $this->many->pivotTable,
+                        $this->many->pivotForeignKey
+                    ),
+                    $id
+                );
+
+            return $this;
+        }
+
+        $this->model->whereIn(
+            sprintf(
+                '%s.%s',
+                $this->model->getTable(),
+                $this->foreignKey
+            ),
+            $id
+        );
 
         return $this;
     }
@@ -207,5 +258,37 @@ class Relation
         $refProp = $refObj->getProperty('primaryKey');
 
         return $refProp->getValue($model);
+    }
+
+    public function filterResult(array|Entity $row, string $returnType): array|Entity
+    {
+        if ($row === [] || $this->type !== RelationTypes::belongsToMany) {
+            return $row;
+        }
+
+        if ($returnType === 'array') {
+            unset($row[$this->many->pivotForeignKey]);
+        } else {
+            unset($row->{$this->many->pivotForeignKey});
+        }
+
+        return $row;
+    }
+
+    public function filterResults(array|Entity $results, string $returnType): array|Entity
+    {
+        if ($this->type !== RelationTypes::belongsToMany) {
+            return $results;
+        }
+
+        foreach ($results as &$row) {
+            if ($returnType === 'array') {
+                unset($row[$this->many->pivotForeignKey]);
+            } else {
+                unset($row->{$this->many->pivotForeignKey});
+            }
+        }
+
+        return $results;
     }
 }

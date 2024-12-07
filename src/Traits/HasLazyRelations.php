@@ -39,12 +39,21 @@ trait HasLazyRelations
 
         $relation = $model->{$name}();
 
-        $relation->model->where($relation->foreignKey, $this->attributes[$relation->primaryKey]);
-
         if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true)) {
-            $this->attributes[$name] = $relation->model->first();
+            $row = $this->attributes[$name] = $relation->filterResult(
+                $relation
+                    ->applyRelation([$this->attributes[$relation->primaryKey]], $relation->foreignKey)
+                    ->model
+                    ->first(),
+                'object'
+            );
         } else {
-            $this->attributes[$name] = $relation->model->findAll();
+            $this->attributes[$name] = $relation->filterResults(
+                $relation->applyRelation([$this->attributes[$relation->primaryKey]], $relation->foreignKey)
+                    ->model
+                    ->findAll(),
+                'object'
+            );
         }
 
         return $this->attributes[$name];

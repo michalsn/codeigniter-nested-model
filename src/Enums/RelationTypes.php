@@ -9,4 +9,5 @@ enum RelationTypes
     case hasOne;
     case hasMany;
     case belongsTo;
+    case belongsToMany;
 }

@@ -8,6 +8,8 @@ use ReflectionException;
 use Tests\Support\Models\AddressModel;
 use Tests\Support\Models\CompanyModel;
 use Tests\Support\Models\CountryModel;
+use Tests\Support\Models\CourseModel;
+use Tests\Support\Models\StudentModel;
 use Tests\Support\Models\UserModel;
 
 class SeedTests extends Seeder
@@ -143,5 +145,74 @@ class SeedTests extends Seeder
         ];
 
         $this->db->table('posts')->insertBatch($posts);
+
+        $students = [
+            [
+                'firstname' => 'Joe',
+                'lastname'  => 'Smith',
+            ],
+            [
+                'firstname' => 'Jack',
+                'lastname'  => 'Sparrow',
+            ],
+            [
+                'firstname' => 'Elizabeth',
+                'lastname'  => 'Swan',
+            ],
+        ];
+        model(StudentModel::class)->insertBatch($students);
+
+        $courses = [
+            [
+                'name'        => 'Baking for dummies',
+                'total_hours' => '30',
+            ],
+            [
+                'name'        => 'PHP is not death',
+                'total_hours' => '22',
+            ],
+            [
+                'name'        => 'The mysteries of tarot',
+                'total_hours' => '10',
+            ],
+            [
+                'name'        => 'How to avoid being killed by your own cat',
+                'total_hours' => '2',
+            ],
+            [
+                'name'        => 'Why cats are better than dogs',
+                'total_hours' => '1',
+            ],
+        ];
+        model(CourseModel::class)->insertBatch($courses);
+
+        $courseStudent = [
+            [
+                'course_id'  => '1',
+                'student_id' => '1',
+            ],
+            [
+                'course_id'  => '3',
+                'student_id' => '1',
+            ],
+            [
+                'course_id'  => '4',
+                'student_id' => '1',
+            ],
+            [
+                'course_id'  => '2',
+                'student_id' => '2',
+            ],
+            [
+                'course_id'  => '2',
+                'student_id' => '3',
+            ],
+            [
+                'course_id'  => '4',
+                'student_id' => '3',
+            ],
+        ];
+
+        $this->db->table('course_student')->insertBatch($courseStudent);
     }
 }
