@@ -24,4 +24,4 @@ This library relies on traits.
 
 ### Entities
 
-- Every entity should use `HasLazyRelations` trait.
+- Every entity should use `HasLazyRelations` trait - of course only if we want to use lazy loading.

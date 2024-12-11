@@ -188,10 +188,22 @@ class UserModel extends Model
 
     public function address(): Relation
     {
-        return $this->hasOneThrough(AddressModel::class, CompanyModel::class);
+        return $this->hasOneThrough(
+            AddressModel::class,
+            CompanyModel::class,
+            'address_id', // foreignKey - AddressModel
+            'id', // foreignKey - CompanyModel
+            'id', // primaryKey - AddressModel
+            'company_id', // primaryKey - CompanyModel
+        );
     }
 }
 ```
+
+In this case we have to specify custom `$foreignKey` and `$primaryKey` for `CompanyModel` which will have the value of `id` and `company_id` respectively.
+
+!!! note
+    We can assign custom keys for all relations.
 
 ### Usage
 
