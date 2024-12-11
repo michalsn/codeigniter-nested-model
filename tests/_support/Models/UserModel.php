@@ -82,7 +82,14 @@ class UserModel extends Model
 
     public function address(): Relation
     {
-        return $this->hasOneThrough(AddressModel::class, CompanyModel::class);
+        return $this->hasOneThrough(
+            AddressModel::class,
+            CompanyModel::class,
+            'address_id',
+            'id',
+            'id',
+            'company_id',
+        );
     }
 
     public function missingReturnType()
