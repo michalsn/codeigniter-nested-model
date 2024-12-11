@@ -142,9 +142,9 @@ class Relation
                     sprintf(
                         '%s.%s = %s.%s',
                         $this->through->model->getTable(),
-                        $this->through->foreignKey,
+                        $this->through->primaryKey,
                         $this->model->getTable(),
-                        $this->primaryKey
+                        $this->foreignKey
                     ),
                     'LEFT'
                 )

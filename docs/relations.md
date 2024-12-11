@@ -6,6 +6,7 @@
 - [One of many](#one-of-many)
 - [Has one through](#has-one-through)
 - [Has many through](#has-many-through)
+- [Many to many](#many-to-many)
 
 ## One to one
 

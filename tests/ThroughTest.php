@@ -8,8 +8,10 @@ use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\DatabaseTestTrait;
 use Tests\Support\Database\Seeds\SeedTests;
 use Tests\Support\Entities\Address;
+use Tests\Support\Entities\Country;
 use Tests\Support\Entities\Post;
 use Tests\Support\Entities\User;
+use Tests\Support\Models\CountryModel;
 use Tests\Support\Models\UserModel;
 
 /**
@@ -56,31 +58,31 @@ final class ThroughTest extends CIUnitTestCase
 
     public function testFindHasManyThrough()
     {
-        $user = model(UserModel::class)->with('posts')->find(1);
-        $this->assertInstanceOf(User::class, $user);
+        $country = model(CountryModel::class)->with('posts')->find(1);
+        $this->assertInstanceOf(Country::class, $country);
 
-        $isset = isset($user->posts);
+        $isset = isset($country->posts);
         $this->assertTrue($isset);
 
-        $this->assertCount(5, $user->posts);
+        $this->assertCount(5, $country->posts);
 
-        $this->assertInstanceOf(Post::class, $user->posts[0]);
+        $this->assertInstanceOf(Post::class, $country->posts[0]);
     }
 
     public function testFindAllHasManyThrough()
     {
-        $users = model(UserModel::class)->with('posts')->findAll();
-        $this->assertInstanceOf(User::class, $users[0]);
+        $countries = model(CountryModel::class)->with('posts')->findAll();
+        $this->assertInstanceOf(Country::class, $countries[0]);
 
-        $this->assertCount(2, $users);
+        $this->assertCount(2, $countries);
 
-        $isset = isset($users[0]->posts);
+        $isset = isset($countries[0]->posts);
         $this->assertTrue($isset);
 
-        $this->assertCount(5, $users[0]->posts);
-        $this->assertInstanceOf(Post::class, $users[0]->posts[0]);
+        $this->assertCount(5, $countries[0]->posts);
+        $this->assertInstanceOf(Post::class, $countries[0]->posts[0]);
 
-        $this->assertCount(3, $users[1]->posts);
-        $this->assertInstanceOf(Post::class, $users[0]->posts[1]);
+        $this->assertCount(3, $countries[1]->posts);
+        $this->assertInstanceOf(Post::class, $countries[0]->posts[1]);
     }
 }
