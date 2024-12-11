@@ -145,4 +145,115 @@ final class ModelTest extends CIUnitTestCase
             ]
         );
     }
+
+    public function testInsertValidationErrors()
+    {
+        $user = [
+            'username'   => 'Test User',
+            'company_id' => '1',
+            'country_id' => '1',
+            'profile'    => [
+                'country' => 'United States of America and something more to violate the validation rule',
+            ],
+        ];
+
+        $userModel = model(UserModel::class);
+        $userModel->with('profile')->useTransactions()->insert($user);
+
+        $this->assertArrayHasKey('country', $userModel->errors());
+        $this->assertSame('The country field cannot exceed 20 characters in length.', $userModel->errors()['country']);
+
+        $this->dontSeeInDatabase(
+            'users',
+            [
+                'id'       => '3',
+                'username' => 'Test User',
+            ]
+        );
+    }
+
+    public function testUpdateValidationErrors()
+    {
+        $user = [
+            'username'   => 'Test User',
+            'company_id' => '1',
+            'country_id' => '1',
+            'profile'    => [
+                'country' => 'United States of America and something more to violate the validation rule',
+            ],
+        ];
+
+        $userModel = model(UserModel::class);
+        $userModel->with('profile')->useTransactions()->update(1, $user);
+
+        $this->assertArrayHasKey('country', $userModel->errors());
+        $this->assertSame('The country field cannot exceed 20 characters in length.', $userModel->errors()['country']);
+
+        $this->dontSeeInDatabase(
+            'users',
+            [
+                'id'       => '1',
+                'username' => 'Test User',
+            ]
+        );
+    }
+
+    public function testDatabaseErrorsOnInsert()
+    {
+        $user = [
+            'username'   => 'Test User 1',
+            'company_id' => '1',
+            'country_id' => '1',
+            'profile'    => [
+                'country' => 'United States of America and something more to violate the validation rule',
+            ],
+        ];
+
+        $userModel = model(UserModel::class);
+        $userModel->with('profile')->useTransactions()->insert($user);
+
+        $this->assertArrayHasKey('database_error', $userModel->errors());
+        $this->assertSame(
+            "Duplicate entry 'Test User 1' for key 'users.username'",
+            $userModel->errors()['database_error']
+        );
+
+        $this->dontSeeInDatabase(
+            'users',
+            [
+                'id'       => '3',
+                'username' => 'Test User 1',
+            ]
+        );
+    }
+
+    public function testDatabaseErrorsOnUpdate()
+    {
+        $user = [
+            'username'   => 'Test User 3',
+            'company_id' => '1',
+            'country_id' => '11', // important
+            'profile'    => [
+                'user_id' => '1',
+                'country' => 'United States of America and something more to violate the validation rule',
+            ],
+        ];
+
+        $userModel = model(UserModel::class);
+        $userModel->with('profile')->useTransactions()->update(1, $user);
+
+        $this->assertArrayHasKey('database_error', $userModel->errors());
+        $this->assertStringContainsString(
+            'Cannot add or update a child row: a foreign key constraint fails',
+            $userModel->errors()['database_error']
+        );
+
+        $this->dontSeeInDatabase(
+            'users',
+            [
+                'id'       => '1',
+                'username' => 'Test User 3',
+            ]
+        );
+    }
 }

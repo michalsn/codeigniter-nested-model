@@ -135,6 +135,7 @@ class Relations extends Migration
             ],
         ]);
         $this->forge->addKey('id', true);
+        $this->forge->addUniqueKey('username');
         $this->forge->addForeignKey('company_id', 'companies', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('country_id', 'countries', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('users');

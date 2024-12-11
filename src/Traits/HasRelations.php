@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Michalsn\CodeIgniterNestedModel\Traits;
 
 use Closure;
+use CodeIgniter\Database\Exceptions\DatabaseException;
+use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Model;
 use LogicException;
 use Michalsn\CodeIgniterNestedModel\Enums\RelationTypes;
@@ -18,7 +20,9 @@ use ReflectionNamedType;
 
 trait HasRelations
 {
-    private array $relations = [];
+    private array $relations      = [];
+    private array $relationErrors = [];
+    private bool $useTransactions = false;
 
     /**
      * Set up model events and initialize
@@ -262,10 +266,17 @@ trait HasRelations
 
         foreach ($this->relations as $relationObject) {
             foreach ($relationObject->getData() as $row) {
-                $row = $this->transformDataToArray($row, 'insert');
-                $relationObject->applyWith()->model->insert(array_merge($row, [
+                $row    = $this->transformDataToArray($row, 'insert');
+                $result = $relationObject->applyWith()->model->insert(array_merge($row, [
                     $relationObject->foreignKey => $eventData[$this->primaryKey],
                 ]));
+
+                if ($result === false) {
+                    $this->relationErrors = array_merge($this->relationErrors, $relationObject->model->errors());
+                    $eventData['result']  = false;
+
+                    return $eventData;
+                }
             }
         }
 
@@ -309,9 +320,16 @@ trait HasRelations
 
                     $relationObject->applyConditions();
 
-                    $query->save(array_merge($row, [
+                    $result = $query->save(array_merge($row, [
                         $relationObject->foreignKey => $id,
                     ]));
+
+                    if ($result === false) {
+                        $this->relationErrors = array_merge($this->relationErrors, $relationObject->model->errors());
+                        $eventData['result']  = false;
+
+                        return $eventData;
+                    }
                 }
             }
         }
@@ -404,7 +422,7 @@ trait HasRelations
         }
 
         $relationData = [];
-        $key          = $relation->hasThrough() ? $relation->primaryKey : $relation->foreignKey;
+        $key          = $relation->foreignKey;
 
         if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true)) {
             foreach ($results as $row) {
@@ -419,5 +437,82 @@ trait HasRelations
         }
 
         return $relationData;
+    }
+
+    /**
+     * Whether to use transaction during insert/update.
+     */
+    public function useTransactions(bool $value = true): static
+    {
+        $this->useTransactions = $value;
+
+        return $this;
+    }
+
+    public function insert($row = null, bool $returnID = true): bool|int|string
+    {
+        if ($this->useTransactions) {
+            try {
+                $this->db->transException(true)->transStart();
+
+                $result = parent::insert($row, $returnID);
+
+                if ($this->errors() !== []) {
+                    $this->db->transRollback();
+
+                    return $result;
+                }
+
+                $this->db->transComplete();
+            } catch (DatabaseException|DataException $e) {
+                $this->relationErrors['database_error'] = $e->getMessage();
+
+                return false;
+            } finally {
+                $this->useTransactions(false);
+            }
+
+            return $result;
+        }
+
+        return parent::insert($row, $returnID);
+    }
+
+    public function update($id = null, $row = null): bool
+    {
+        if ($this->useTransactions) {
+            try {
+                $this->db->transException(true)->transStart();
+
+                $result = parent::update($id, $row);
+
+                if ($this->errors() !== []) {
+                    $this->db->transRollback();
+
+                    return $result;
+                }
+
+                $this->db->transComplete();
+            } catch (DatabaseException|DataException $e) {
+                $this->relationErrors['database_error'] = $e->getMessage();
+
+                return false;
+            } finally {
+                $this->useTransactions(false);
+            }
+
+            return $result;
+        }
+
+        return parent::update($id, $row);
+    }
+
+    public function errors(bool $forceDB = false)
+    {
+        if ($this->relationErrors !== []) {
+            return $this->relationErrors;
+        }
+
+        return parent::errors($forceDB);
     }
 }
