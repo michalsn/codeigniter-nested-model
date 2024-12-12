@@ -53,14 +53,14 @@
         <env name="COMPOSER_DISABLE_XDEBUG_WARN" value="1"/>
         <!-- Database configuration -->
         <env name="database.tests.strictOn" value="true"/>
-        <!-- Uncomment to use alternate testing database configuration -->
+        <!-- Uncomment to use alternate testing database configuration
         <env name="database.tests.hostname" value="127.0.0.1"/>
         <env name="database.tests.database" value="tests"/>
         <env name="database.tests.username" value="root"/>
         <env name="database.tests.password" value=""/>
         <env name="database.tests.DBDriver" value="MySQLi"/>
         <env name="database.tests.DBPrefix" value=""/>
-        <!---->
+        -->
     </php>
     <source>
         <include>

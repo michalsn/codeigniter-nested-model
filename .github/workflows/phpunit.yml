@@ -20,14 +20,44 @@ on:
 
 jobs:
   main:
-    name: PHP ${{ matrix.php-versions }} Unit Tests
+    name: PHP ${{ matrix.php-versions }} - ${{ matrix.db-platforms }}
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
     strategy:
       matrix:
         php-versions: ['8.2', '8.3']
+        db-platforms: ['MySQLi']
+
+    mysql:
+      image: mysql:8.0
+      env:
+        MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        MYSQL_DATABASE: test
+      ports:
+        - 3306:3306
+      options: >-
+        --health-cmd="mysqladmin ping"
+        --health-interval=10s
+        --health-timeout=5s
+        --health-retries=3
 
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+
+          # all of these default to true, but feel free to set to
+          # "false" if necessary for your workflow
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -62,10 +92,11 @@ jobs:
       - name: Test with PHPUnit
         run: vendor/bin/phpunit --coverage-text
         env:
+          DB: ${{ matrix.db-platforms }}
           TERM: xterm-256color
           TACHYCARDIA_MONITOR_GA: enabled
 
-      - if: matrix.php-versions == '8.1'
+      - if: matrix.php-versions == '8.2'
         name: Run Coveralls
         continue-on-error: true
         run: |
@@ -74,7 +105,7 @@ jobs:
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_PARALLEL: true
-          COVERALLS_FLAG_NAME: PHP ${{ matrix.php-versions }}
+          COVERALLS_FLAG_NAME: PHP ${{ matrix.php-versions }} - ${{ matrix.db-platforms }}
 
   coveralls:
     needs: [main]
