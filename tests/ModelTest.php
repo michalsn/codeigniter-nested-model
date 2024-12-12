@@ -214,7 +214,7 @@ final class ModelTest extends CIUnitTestCase
 
         $this->assertArrayHasKey('database_error', $userModel->errors());
         $this->assertSame(
-            "Duplicate entry 'Test User 1' for key 'users.username'",
+            "Duplicate entry 'Test User 1' for key 'db_users.username'",
             $userModel->errors()['database_error']
         );
 
