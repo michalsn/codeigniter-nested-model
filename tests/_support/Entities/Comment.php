@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Support\Entities;
 
 use CodeIgniter\Entity\Entity;
