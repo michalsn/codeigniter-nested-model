@@ -34,9 +34,31 @@ model(UserModel::class)->with('profile')->findAll();
 
 This will perform two queries. One for all users, and one to fetch all the profiles for these users.
 
+The data for the relation will be available under the relation name, in this case `$user->profile`. Data format will respect the `$returnType` set in the `ProfileModel` class.
+
 !!! note
 
     You can still use your model as usual. If you omit the `with()` part, your model will work like a normal model.
+
+### Deep relations
+
+We can also call deep relations. This will query all posts for user and then all the comments for posts:
+
+```php
+model(UserModel::class)->with('posts')->with('posts.comments')->find(1);
+```
+
+The `'posts.comments'` relation mean that we will be looking for `comments` relation in the `PostModel` class.
+
+We can go even further and get only comments that were created by user we're looking for:
+
+```php
+model(UserModel::class)->with('posts')->with('posts.comments', static function (Model $model) {
+    $model->where('comments.user_id', 1);
+})->find(1);
+```
+
+This will again query all posts for user but then will get only comments for posts that were created by user with ID `1`.
 
 ### Writing with relation
 
