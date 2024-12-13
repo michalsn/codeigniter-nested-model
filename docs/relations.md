@@ -219,8 +219,8 @@ A one-to-many relationship that is linked through an intermediate model. This me
 
 Consider an application where::
 
-- A *Country* has many *Users*.
-- A *User* has many *Posts*.
+- A **Country** has many **Users**.
+- A **User** has many **Posts**.
 
 You want to fetch all Posts for a Country, even though the Posts table does not directly reference the Country.
 
@@ -257,10 +257,14 @@ A `belongsToMany` relationship is used for many-to-many associations between two
 
 Consider an application where:
 
-- *Students* can enroll in multiple *Courses*.
-- A *Course* can have multiple *Students*.
+- **Students** can enroll in multiple **Courses**.
+- A **Course** can have multiple **Students**.
 
 Since both Students and Courses can be related to each other in many ways, we use a pivot table to manage this association.
+
+The pivot table should have a name derived from the name of both tables. In this example, it would be `course_student` - note the singular form of the words. The order of the words is alphabetical.
+
+The table should contain a primary key (`id` - auto_increment) and two foreign keys for both of models: `course_id` and `student_id`.
 
 ```php
 class StudentModel extends Model
