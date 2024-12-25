@@ -39,6 +39,9 @@ trait HasRelations
         helper('inflector');
     }
 
+    /**
+     * Set the relation to use.
+     */
     public function with(string $relation, ?Closure $closure = null): static
     {
         if (str_contains($relation, '.')) {
@@ -64,6 +67,9 @@ trait HasRelations
         return $this;
     }
 
+    /**
+     * Validate relation definition.
+     */
     private function checkReturnType(string $methodName): bool
     {
         if (! method_exists($this, $methodName)) {
@@ -183,12 +189,18 @@ trait HasRelations
             ->setMany($pivotTable, $pivotForeignKey, $pivotRelatedKey);
     }
 
+    /**
+     * Return model instance.
+     */
     private function getModelInstance(Model|string $model): Model
     {
         return $model instanceof Model ? $model : model($model);
     }
 
-    private function createPivotTableName($table1, $table2): string
+    /**
+     * Create pivot table name.
+     */
+    private function createPivotTableName(mixed $table1, mixed $table2): string
     {
         $tables = [$table1, $table2];
         sort($tables);
@@ -199,6 +211,8 @@ trait HasRelations
     }
 
     /**
+     * Get the caller method name.
+     *
      * @throws ReflectionException
      */
     private function getInitialMethodName(): string
@@ -378,6 +392,9 @@ trait HasRelations
         return $eventData;
     }
 
+    /**
+     * Get relation data for a single item.
+     */
     protected function getDataForRelationById(int|string $id, Relation $relation)
     {
         $relation->applyWith()->applyRelation([$id], $this->primaryKey)->applyConditions();
@@ -389,6 +406,9 @@ trait HasRelations
         return $relation->filterResults($results, $this->tempReturnType);
     }
 
+    /**
+     * Get relation data for many items.
+     */
     protected function getDataForRelationByIds(array $id, Relation $relation): array
     {
         $relation->applyWith()->applyRelation($id, $this->primaryKey)->applyConditions();
@@ -440,6 +460,28 @@ trait HasRelations
     }
 
     /**
+     * Validate if given relation can be handled during write operation.
+     */
+    protected function validateWriteRelations(): void
+    {
+        if ($this->relations === []) {
+            return;
+        }
+
+        foreach ($this->relations as $relation) {
+            if (
+                ! in_array($relation->type, [RelationTypes::hasOne, RelationTypes::hasMany], true)
+                || (
+                    in_array($relation->type, [RelationTypes::hasOne, RelationTypes::hasMany], true)
+                    && ($relation->hasMany() || $relation->hasThrough())
+                )
+            ) {
+                throw NestedModelException::forRelationDoesNotSupportWrite();
+            }
+        }
+    }
+
+    /**
      * Whether to use transaction during insert/update.
      */
     public function useTransactions(bool $value = true): static
@@ -451,6 +493,8 @@ trait HasRelations
 
     public function insert($row = null, bool $returnID = true): bool|int|string
     {
+        $this->validateWriteRelations();
+
         if ($this->useTransactions) {
             try {
                 $this->db->transException(true)->transStart();
@@ -480,6 +524,8 @@ trait HasRelations
 
     public function update($id = null, $row = null): bool
     {
+        $this->validateWriteRelations();
+
         if ($this->useTransactions) {
             try {
                 $this->db->transException(true)->transStart();

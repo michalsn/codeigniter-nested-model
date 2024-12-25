@@ -60,4 +60,12 @@ final class ExceptionTest extends CIUnitTestCase
 
         model(UserModel::class)->posts()->latestOfMany();
     }
+
+    public function testNotValidWriteRelation(): void
+    {
+        $this->expectException(NestedModelException::class);
+        $this->expectExceptionMessage('This type of relation does not support write.');
+
+        model(UserModel::class)->with('address')->insert(['what' => 'ever']);
+    }
 }

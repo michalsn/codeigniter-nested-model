@@ -32,4 +32,9 @@ final class NestedModelException extends RuntimeException
     {
         return new self(lang('NestedModel.incorrectReturnType', [$name]));
     }
+
+    public static function forRelationDoesNotSupportWrite(): static
+    {
+        return new self(lang('NestedModel.relationDoesNotSupportWrite'));
+    }
 }
