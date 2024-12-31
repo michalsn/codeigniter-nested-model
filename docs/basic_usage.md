@@ -14,7 +14,7 @@ class UserModel extends Model
 
     // ...
 
-    public function initialize()
+    protected function initialize()
     {
         $this->initRelations();
     }
@@ -100,7 +100,7 @@ class UserModel extends Model
 
     // ...
 
-    public function initialize()
+    protected function initialize()
     {
         $this->initRelations();
     }

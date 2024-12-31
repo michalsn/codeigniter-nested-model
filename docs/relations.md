@@ -23,7 +23,7 @@ class UserModel extends Model
 
     // ...
 
-    public function initialize()
+    protected function initialize()
     {
         $this->initRelations();
     }
@@ -56,7 +56,7 @@ class UserModel extends Model
 
     // ...
 
-    public function initialize()
+    protected function initialize()
     {
         $this->initRelations();
     }
@@ -89,7 +89,7 @@ class PostModel extends Model
 
     // ...
 
-    public function initialize()
+    protected function initialize()
     {
         $this->initRelations();
     }
@@ -181,7 +181,7 @@ class UserModel extends Model
 
     // ...
 
-    public function initialize()
+    protected function initialize()
     {
         $this->initRelations();
     }
@@ -231,7 +231,7 @@ class CountryModel extends Model
 
     // ...
 
-    public function initialize()
+    protected function initialize()
     {
         $this->initRelations();
     }
@@ -273,7 +273,7 @@ class StudentModel extends Model
 
     // ...
 
-    public function initialize()
+    protected function initialize()
     {
         $this->initRelations();
     }
@@ -291,7 +291,7 @@ class CourseModel extends Model
 
     // ...
 
-    public function initialize()
+    protected function initialize()
     {
         $this->initRelations();
     }
