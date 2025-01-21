@@ -104,7 +104,7 @@ trait HasRelations
             $relationType,
             $model,
             $foreignKey ?? ($relationType === RelationTypes::belongsTo ? get_primary_key($model) : get_foreign_key($this)),
-            $primaryKey ?? ($relationType === RelationTypes::belongsTo ? get_foreign_key($model) : get_primary_key($this))
+            $primaryKey ?? ($relationType === RelationTypes::belongsTo ? get_foreign_key($model) : get_primary_key($this)),
         );
 
         // dd($this->relations[$relation]->foreignKey, $this->relations[$relation]->primaryKey);
@@ -144,7 +144,7 @@ trait HasRelations
         ?string $throughForeignKey = null,
         ?string $foreignKey = null,
         ?string $throughPrimaryKey = null,
-        ?string $primaryKey = null
+        ?string $primaryKey = null,
     ): Relation {
         $model   = $this->getModelInstance($model);
         $through = $this->getModelInstance($through);
@@ -165,7 +165,7 @@ trait HasRelations
         ?string $throughForeignKey = null,
         ?string $foreignKey = null,
         ?string $throughPrimaryKey = null,
-        ?string $primaryKey = null
+        ?string $primaryKey = null,
     ): Relation {
         $model   = $this->getModelInstance($model);
         $through = $this->getModelInstance($through);
@@ -419,7 +419,7 @@ trait HasRelations
                 ->join(
                     sprintf(
                         '%s relation1',
-                        $relation->model->getTable()
+                        $relation->model->getTable(),
                     ),
                     sprintf(
                         '%s.%s = %s.%s AND %s.%s %s %s.%s',
@@ -433,7 +433,7 @@ trait HasRelations
                         'relation1',
                         $ofMany->getField(),
                     ),
-                    'LEFT'
+                    'LEFT',
                 )
                 ->where('relation1.' . $relation->primaryKey, null)
                 ->findAll();

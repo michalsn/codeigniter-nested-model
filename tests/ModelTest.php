@@ -42,7 +42,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'user_id' => '1',
                 'country' => 'Canada',
-            ]
+            ],
         );
 
         $this->seeInDatabase(
@@ -50,7 +50,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'       => '1',
                 'username' => 'Jack',
-            ]
+            ],
         );
 
         // Save with relation
@@ -63,7 +63,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'user_id' => '1',
                 'country' => 'Canada',
-            ]
+            ],
         );
 
         $this->seeInDatabase(
@@ -71,7 +71,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'       => '1',
                 'username' => 'Bill',
-            ]
+            ],
         );
     }
 
@@ -97,7 +97,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'    => '1',
                 'title' => 'Title 11',
-            ]
+            ],
         );
 
         $this->dontSeeInDatabase(
@@ -105,7 +105,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'    => '2',
                 'title' => 'Title 22',
-            ]
+            ],
         );
 
         $this->seeInDatabase(
@@ -113,7 +113,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'       => '1',
                 'username' => 'Jack',
-            ]
+            ],
         );
 
         // Save with relation
@@ -126,7 +126,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'    => '1',
                 'title' => 'Title 11',
-            ]
+            ],
         );
 
         $this->seeInDatabase(
@@ -134,7 +134,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'    => '2',
                 'title' => 'Title 22',
-            ]
+            ],
         );
 
         $this->seeInDatabase(
@@ -142,7 +142,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'       => '1',
                 'username' => 'Bill',
-            ]
+            ],
         );
     }
 
@@ -168,7 +168,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'       => '3',
                 'username' => 'Test User',
-            ]
+            ],
         );
     }
 
@@ -194,7 +194,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'       => '1',
                 'username' => 'Test User',
-            ]
+            ],
         );
     }
 
@@ -215,7 +215,7 @@ final class ModelTest extends CIUnitTestCase
         $this->assertArrayHasKey('database_error', $userModel->errors());
         $this->assertSame(
             "Duplicate entry 'Test User 1' for key 'db_users.username'",
-            $userModel->errors()['database_error']
+            $userModel->errors()['database_error'],
         );
 
         $this->dontSeeInDatabase(
@@ -223,7 +223,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'       => '3',
                 'username' => 'Test User 1',
-            ]
+            ],
         );
     }
 
@@ -245,7 +245,7 @@ final class ModelTest extends CIUnitTestCase
         $this->assertArrayHasKey('database_error', $userModel->errors());
         $this->assertStringContainsString(
             'Cannot add or update a child row: a foreign key constraint fails',
-            $userModel->errors()['database_error']
+            $userModel->errors()['database_error'],
         );
 
         $this->dontSeeInDatabase(
@@ -253,7 +253,7 @@ final class ModelTest extends CIUnitTestCase
             [
                 'id'       => '1',
                 'username' => 'Test User 3',
-            ]
+            ],
         );
     }
 }

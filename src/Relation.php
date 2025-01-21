@@ -33,7 +33,7 @@ class Relation
         public readonly RelationTypes $type,
         public readonly Model $model,
         public readonly string $foreignKey,
-        public readonly string $primaryKey
+        public readonly string $primaryKey,
     ) {
     }
 
@@ -104,7 +104,7 @@ class Relation
         $this->through = new Through(
             $model,
             $foreignKey ?? get_foreign_key($model),
-            $primaryKey ?? get_primary_key($model)
+            $primaryKey ?? get_primary_key($model),
         );
 
         return $this;
@@ -144,17 +144,17 @@ class Relation
                         $this->through->model->getTable(),
                         $this->through->primaryKey,
                         $this->model->getTable(),
-                        $this->foreignKey
+                        $this->foreignKey,
                     ),
-                    'LEFT'
+                    'LEFT',
                 )
                 ->whereIn(
                     sprintf(
                         '%s.%s',
                         $this->through->model->getTable(),
-                        $primaryKey
+                        $primaryKey,
                     ),
-                    $id
+                    $id,
                 );
 
             return $this;
@@ -167,8 +167,8 @@ class Relation
                         '%s.*, %s.%s',
                         $this->model->getTable(),
                         $this->many->pivotTable,
-                        $this->many->pivotForeignKey
-                    )
+                        $this->many->pivotForeignKey,
+                    ),
                 )
                 ->join(
                     $this->many->pivotTable,
@@ -177,17 +177,17 @@ class Relation
                         $this->many->pivotTable,
                         $this->many->pivotRelatedKey,
                         $this->model->getTable(),
-                        get_primary_key($this->model)
+                        get_primary_key($this->model),
                     ),
-                    'LEFT'
+                    'LEFT',
                 )
                 ->whereIn(
                     sprintf(
                         '%s.%s',
                         $this->many->pivotTable,
-                        $this->many->pivotForeignKey
+                        $this->many->pivotForeignKey,
                     ),
-                    $id
+                    $id,
                 );
 
             return $this;
@@ -197,9 +197,9 @@ class Relation
             sprintf(
                 '%s.%s',
                 $this->model->getTable(),
-                $this->foreignKey
+                $this->foreignKey,
             ),
-            $id
+            $id,
         );
 
         return $this;
