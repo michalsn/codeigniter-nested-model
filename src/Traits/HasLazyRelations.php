@@ -45,14 +45,14 @@ trait HasLazyRelations
                     ->applyRelation([$this->attributes[$relation->primaryKey]], $relation->foreignKey)
                     ->model
                     ->first(),
-                'object'
+                'object',
             );
         } else {
             $this->attributes[$name] = $relation->filterResults(
                 $relation->applyRelation([$this->attributes[$relation->primaryKey]], $relation->foreignKey)
                     ->model
                     ->findAll(),
-                'object'
+                'object',
             );
         }
 

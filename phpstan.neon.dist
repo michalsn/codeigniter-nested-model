@@ -12,6 +12,9 @@ parameters:
 	    - '#Call to an undefined method CodeIgniter\\Model::with\(\).#'
 	    - '#Call to an undefined method CodeIgniter\\Model::getTable\(\).#'
 	    - '#Cannot access property \$[a-zA-Z0-9\\_]+ on array\|bool\|float\|int\|object\|string.#'
+	    - '#^.*expects array\<int\|string, bool\|float\|int\|object\|string\|null\>\|object\|null, array\<string, array\<string, string\>\|string\> given\.$#'
+	    - '#^.*expects array\<int\|string, bool\|float\|int\|object\|string\|null\>\|object\|null, array\<string, array\<int\|string, array\<string, int\|list\<array\<string, int\|string\>\>\|string\>\|string\>\|string\> given\.$#'
+	    - '#^PHPDoc tag @var with type CodeIgniter\\Entity\\Entity is not subtype of native type.*#'
 	universalObjectCratesClasses:
 		- CodeIgniter\Entity
 		- CodeIgniter\Entity\Entity

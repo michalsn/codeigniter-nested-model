@@ -16,7 +16,7 @@
         "php": "^8.2"
     },
     "require-dev": {
-        "codeigniter4/devkit": "^1.0",
+        "codeigniter4/devkit": "dev-develop",
         "codeigniter4/framework": "^4.5"
     },
     "minimum-stability": "dev",
