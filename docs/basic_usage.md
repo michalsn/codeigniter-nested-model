@@ -8,6 +8,9 @@
 First, we have to define our relations. In the below example we will have `UserModel`, which have one-to-one relation with `ProfileModel`.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class UserModel extends Model
 {
     use HasRelations;
@@ -90,6 +93,9 @@ $userModel->with('profile')->save($user);
 Here we also have to specify our relations, just like in eager loading. The only difference is that we are required to use an `Entity` for our `$returnType`. That's because the entity will be responsible for triggering the relation request.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class UserModel extends Model
 {
     use HasRelations;
@@ -115,6 +121,8 @@ class UserModel extends Model
 The entity class we use have to use `hasLazyRelations` trait.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Traits\HasLazyRelations;
+
 class User extends Entity
 {
     use HasLazyRelations;
