@@ -17,6 +17,9 @@ A one-to-one relationship where one model is associated with exactly one instanc
 A User model has one Profile. Each user can have only one profile.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class UserModel extends Model
 {
     use HasRelations;
@@ -50,6 +53,9 @@ A one-to-many relationship where one model is associated with multiple instances
 A User has many Posts. Each user can have multiple posts.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class UserModel extends Model
 {
     use HasRelations;
@@ -83,6 +89,9 @@ A one-to-many inverse relationship where a model belongs to another model.
 A Post belongs to a User. Each profile is associated with one specific user.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class PostModel extends Model
 {
     use HasRelations;
@@ -116,6 +125,9 @@ A specialized type of one-to-one relationship where a parent model has multiple 
 This type of relation is especially useful for scenarios where a model has many records, but you only need to retrieve one representative record from the set.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class UserModel extends Model
 {
     use HasRelations;
@@ -175,6 +187,9 @@ Consider an application where:
 You want to retrieve a User's Address without needing to manually query through the Company.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class UserModel extends Model
 {
     use HasRelations;
@@ -225,6 +240,9 @@ Consider an application where::
 You want to fetch all Posts for a Country, even though the Posts table does not directly reference the Country.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class CountryModel extends Model
 {
     use HasRelations;
@@ -267,6 +285,9 @@ The pivot table should have a name derived from the name of both tables. In this
 The table should contain a primary key (`id` - auto_increment) and two foreign keys for both of models: `course_id` and `student_id`.
 
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class StudentModel extends Model
 {
     use HasRelations;
@@ -285,6 +306,9 @@ class StudentModel extends Model
 }
 ```
 ```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
 class CourseModel extends Model
 {
     use HasRelations;
