@@ -2,6 +2,7 @@
 
 - [Eager loading](#eager-loading)
 - [Lazy loading](#lazy-loading)
+- [Transforming relation IDs](#transforming-relation-ids)
 
 ## Eager loading
 
@@ -141,3 +142,53 @@ foreach ($users as $user) {
 ```
 
 This will perform `n+1` queries. First one to get all the users and then one for each profile we want to access.
+
+## Transforming relation IDs
+
+Sometimes you may need to transform the IDs before they are used in the relation queries. This is particularly useful when working with different ID formats, such as UUIDs, that need to be converted to binary format. An ideal example is the [codeigniter4-uuid](https://github.com/michalsn/codeigniter4-uuid) package.
+
+You can define transformation methods in your model to automatically transform IDs when loading relations:
+
+```php
+use Michalsn\CodeIgniterNestedModel\Relation;
+use Michalsn\CodeIgniterNestedModel\Traits\HasRelations;
+
+class UserModel extends Model
+{
+    use HasRelations;
+
+    // ...
+
+    protected function initialize()
+    {
+        $this->initRelations();
+    }
+
+    public function profile(): Relation
+    {
+        return $this->hasOne(ProfileModel::class);
+    }
+
+    // Transform IDs specifically for the 'profile' relation
+    protected function transformProfileRelationIds(array $ids): array
+    {
+        return array_map(fn ($id) => $this->uuid->fromValue($id)->getBytes(), $ids);
+    }
+}
+```
+
+!!! note
+    This will be needed only if you store your UUIDs in a byte format.
+
+### Method naming
+
+The transformation methods follow a specific naming convention:
+
+- `transform{RelationName}RelationIds()` for specific relations
+- `transformAllRelationIds()` for a general fallback
+
+### Priority order
+
+1. Specific method (e.g., `transformProfileRelationIds()`) - highest priority
+2. General method (`transformAllRelationIds()`) - fallback
+3. No transformation - if neither method exists
