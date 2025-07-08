@@ -68,6 +68,28 @@ trait HasRelations
     }
 
     /**
+     * Transform relation IDs before using them in whereIn queries
+     * This method checks for relation-specific transform methods
+     */
+    private function transformRelationIds(array $ids, string $relationName): array
+    {
+        // Check if there's a specific transform method for this relation
+        // e.g., transformProfileRelationIds() for 'profile' relation
+        $transformMethod = 'transform' . ucfirst($relationName) . 'RelationIds';
+
+        if (method_exists($this, $transformMethod)) {
+            return $this->{$transformMethod}($ids);
+        }
+
+        // Check for a general relation transform method
+        if (method_exists($this, 'transformAllRelationIds')) {
+            return $this->transformAllRelationIds($ids);
+        }
+
+        return $ids;
+    }
+
+    /**
      * Validate relation definition.
      */
     private function checkReturnType(string $methodName): bool
@@ -365,17 +387,17 @@ trait HasRelations
         if ($eventData['singleton']) {
             if ($this->tempReturnType === 'array') {
                 foreach ($this->relations as $relationName => $relationObject) {
-                    $eventData['data'][$relationName] = $this->getDataForRelationById($eventData['data'][$relationObject->primaryKey], $relationObject);
+                    $eventData['data'][$relationName] = $this->getDataForRelationById($eventData['data'][$relationObject->primaryKey], $relationObject, $relationName);
                 }
             } else {
                 foreach ($this->relations as $relationName => $relationObject) {
-                    $eventData['data']->{$relationName} = $this->getDataForRelationById($eventData['data']->{$relationObject->primaryKey}, $relationObject);
+                    $eventData['data']->{$relationName} = $this->getDataForRelationById($eventData['data']->{$relationObject->primaryKey}, $relationObject, $relationName);
                 }
             }
         } else {
             foreach ($this->relations as $relationName => $relationObject) {
                 $ids          = array_column($eventData['data'], $relationObject->primaryKey);
-                $relationData = $this->getDataForRelationByIds($ids, $relationObject);
+                $relationData = $this->getDataForRelationByIds($ids, $relationObject, $relationName);
 
                 foreach ($eventData['data'] as &$data) {
                     if ($this->tempReturnType === 'array') {
@@ -395,9 +417,11 @@ trait HasRelations
     /**
      * Get relation data for a single item.
      */
-    protected function getDataForRelationById(int|string $id, Relation $relation)
+    protected function getDataForRelationById(int|string $id, Relation $relation, string $relationName)
     {
-        $relation->applyWith()->applyRelation([$id], $this->primaryKey)->applyConditions();
+        $id = $this->transformRelationIds([$id], $relationName);
+
+        $relation->applyWith()->applyRelation($id, $this->primaryKey)->applyConditions();
 
         $results = in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true) ?
             $relation->model->first() :
@@ -409,8 +433,11 @@ trait HasRelations
     /**
      * Get relation data for many items.
      */
-    protected function getDataForRelationByIds(array $id, Relation $relation): array
+    protected function getDataForRelationByIds(array $id, Relation $relation, string $relationName): array
     {
+        // Transform the ID before applying relation
+        $id = $this->transformRelationIds($id, $relationName);
+
         $relation->applyWith()->applyRelation($id, $this->primaryKey)->applyConditions();
 
         if ($relation->type === RelationTypes::hasOne && ($ofMany = $relation->getOfMany()) !== null) {
