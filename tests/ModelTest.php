@@ -213,8 +213,8 @@ final class ModelTest extends CIUnitTestCase
         $userModel->with('profile')->useTransactions()->insert($user);
 
         $this->assertArrayHasKey('database_error', $userModel->errors());
-        $this->assertSame(
-            "Duplicate entry 'Test User 1' for key 'db_users.username'",
+        $this->assertMatchesRegularExpression(
+            "/Duplicate entry 'Test User 1' for key '(db_users.username|username)'/",
             $userModel->errors()['database_error'],
         );
 
