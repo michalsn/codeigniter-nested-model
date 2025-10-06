@@ -8,8 +8,10 @@ use CodeIgniter\Model;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\DatabaseTestTrait;
 use Tests\Support\Database\Seeds\SeedTests;
+use Tests\Support\Entities\Comment;
 use Tests\Support\Entities\Post;
 use Tests\Support\Entities\User;
+use Tests\Support\Models\CommentModel;
 use Tests\Support\Models\PostModel;
 use Tests\Support\Models\UserModel;
 
@@ -138,5 +140,49 @@ final class HasManyTest extends CIUnitTestCase
 
         $this->assertSame('1', $post->user->id);
         $this->assertSame('Test User 1', $post->user->username);
+    }
+
+    public function testFindBelongsToWithEntityDatamap()
+    {
+        // Load normal model
+        $comment = model(CommentModel::class)->find(1);
+        $this->assertInstanceOf(Comment::class, $comment);
+
+        $isset = isset($comment->user);
+        $this->assertFalse($isset);
+
+        // Load model with relation
+        $comment = model(CommentModel::class)->with('user')->find(1);
+        $this->assertInstanceOf(Comment::class, $comment);
+
+        $isset = isset($comment->user);
+        $this->assertTrue($isset);
+
+        $this->assertInstanceOf(User::class, $comment->user);
+
+        $this->assertSame('1', $comment->user->id);
+        $this->assertSame('Test User 1', $comment->user->username);
+    }
+
+    public function testFindAllBelongsToWithEntityDatamap()
+    {
+        // Load normal model
+        $comments = model(CommentModel::class)->findAll();
+        $this->assertInstanceOf(Comment::class, $comments[0]);
+
+        $isset = isset($comments[0]->user);
+        $this->assertFalse($isset);
+
+        // Load model with relation
+        $comments = model(CommentModel::class)->with('user')->findAll();
+        $this->assertInstanceOf(Comment::class, $comments[0]);
+
+        $isset = isset($comments[0]->user);
+        $this->assertTrue($isset);
+
+        $this->assertInstanceOf(User::class, $comments[0]->user);
+
+        $this->assertSame('1', $comments[0]->user->id);
+        $this->assertSame('Test User 1', $comments[0]->user->username);
     }
 }
