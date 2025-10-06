@@ -7,6 +7,7 @@ namespace Michalsn\CodeIgniterNestedModel\Traits;
 use Closure;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Database\Exceptions\DataException;
+use CodeIgniter\Entity\Entity;
 use CodeIgniter\Model;
 use LogicException;
 use Michalsn\CodeIgniterNestedModel\Enums\RelationTypes;
@@ -396,7 +397,15 @@ trait HasRelations
             }
         } else {
             foreach ($this->relations as $relationName => $relationObject) {
-                $ids          = array_column($eventData['data'], $relationObject->primaryKey);
+                $ids = array_unique(array_column(
+                    array_map(
+                        static fn ($item) => $item instanceof Entity
+                            ? $item->toRawArray()
+                            : $item,
+                        $eventData['data'],
+                    ),
+                    $relationObject->primaryKey,
+                ));
                 $relationData = $this->getDataForRelationByIds($ids, $relationObject, $relationName);
 
                 foreach ($eventData['data'] as &$data) {
