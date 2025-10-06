@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace Tests;
 
 use CodeIgniter\Entity\Entity;
-use CodeIgniter\Model;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\DatabaseTestTrait;
 use Tests\Support\Database\Seeds\SeedTests;
-use Tests\Support\Entities\Profile;
 use Tests\Support\Entities\User;
 use Tests\Support\Models\UserModel;
 
