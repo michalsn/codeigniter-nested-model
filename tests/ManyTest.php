@@ -37,6 +37,7 @@ final class ManyTest extends CIUnitTestCase
 
         $this->assertInstanceOf(Course::class, $courses[0]);
         $this->assertSame('Baking for dummies', $courses[0]->name);
+        $this->assertFalse($courses[0]->hasChanged());
     }
 
     public function testFindAllManyCourses()
@@ -51,6 +52,7 @@ final class ManyTest extends CIUnitTestCase
 
         $this->assertInstanceOf(Course::class, $courses[0]);
         $this->assertSame('PHP is not death', $courses[0]->name);
+        $this->assertFalse($courses[0]->hasChanged());
     }
 
     public function testFindManyStudents()
@@ -67,6 +69,7 @@ final class ManyTest extends CIUnitTestCase
 
         $this->assertInstanceOf(Student::class, $students[0]);
         $this->assertSame('Joe', $students[0]->firstname);
+        $this->assertFalse($students[0]->hasChanged());
     }
 
     public function testFindAllManyStudents()
@@ -81,5 +84,6 @@ final class ManyTest extends CIUnitTestCase
 
         $this->assertInstanceOf(Student::class, $students[1]);
         $this->assertSame('Elizabeth', $students[1]->firstname);
+        $this->assertFalse($students[0]->hasChanged());
     }
 }

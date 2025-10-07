@@ -270,6 +270,10 @@ class Relation
             unset($row[$this->many->pivotForeignKey]);
         } else {
             unset($row->{$this->many->pivotForeignKey});
+
+            if ($row instanceof Entity) {
+                $row->syncOriginal();
+            }
         }
 
         return $row;
@@ -286,6 +290,10 @@ class Relation
                 unset($row[$this->many->pivotForeignKey]);
             } else {
                 unset($row->{$this->many->pivotForeignKey});
+
+                if ($row instanceof Entity) {
+                    $row->syncOriginal();
+                }
             }
         }
 
