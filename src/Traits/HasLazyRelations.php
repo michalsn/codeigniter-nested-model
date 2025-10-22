@@ -9,12 +9,18 @@ use Michalsn\CodeIgniterNestedModel\Enums\RelationTypes;
 
 trait HasLazyRelations
 {
+    /**
+     * @var array<string, bool>
+     */
+    private array $handledRelations = [];
+
     public function __get(string $key)
     {
         $result = parent::__get($key);
 
-        if ($result === null) {
-            $result = $this->handleRelation($key);
+        if ($result === null && ! isset($this->handledRelations[$key])) {
+            $result                       = $this->handleRelation($key);
+            $this->handledRelations[$key] = true;
         }
 
         return $result;
@@ -40,7 +46,7 @@ trait HasLazyRelations
         $relation = $model->{$name}();
 
         if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true)) {
-            $row = $this->attributes[$name] = $relation->filterResult(
+            $this->attributes[$name] = $relation->filterResult(
                 $relation
                     ->applyRelation([$this->attributes[$relation->primaryKey]], $relation->foreignKey)
                     ->model
