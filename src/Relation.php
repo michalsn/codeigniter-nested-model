@@ -27,7 +27,7 @@ class Relation
     /**
      * @var list<mixed>
      */
-    private array|Entity $data = [];
+    private array|Entity|null $data = [];
 
     public function __construct(
         public readonly RelationTypes $type,
@@ -61,7 +61,7 @@ class Relation
     /**
      * @param list<mixed> $data
      */
-    public function setData(array|Entity $data): static
+    public function setData(array|Entity|null $data): static
     {
         $this->data = $data;
 
@@ -277,7 +277,7 @@ class Relation
 
     public function filterResults(array|Entity $results, string $returnType): array|Entity
     {
-        if ($this->type !== RelationTypes::belongsToMany) {
+        if ($results === [] || $this->type !== RelationTypes::belongsToMany) {
             return $results;
         }
 
