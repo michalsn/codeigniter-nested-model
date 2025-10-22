@@ -31,6 +31,12 @@ parameters:
 			path: tests/EntityTest.php
 
 		-
+			message: '#^Parameter \#1 \$row of method Tests\\Support\\Models\\UserModel\:\:insert\(\) expects array\<int\|string, bool\|float\|int\|object\|string\|null\>\|object\|null, array\<string, array\|string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/EntityTest.php
+
+		-
 			message: '#^Cannot access property \$country on array\|bool\|float\|int\|object\|string\.$#'
 			identifier: property.nonObject
 			count: 1

@@ -102,4 +102,46 @@ final class EntityTest extends CIUnitTestCase
 
         $this->assertSame($queryCount + 1, $this->queryCount);
     }
+
+    public function testSaveNullRelationOneToOneSkipsInsert()
+    {
+        $model = model(UserModel::class);
+        $data  = [
+            'username'   => 'Test User',
+            'company_id' => '2',
+            'country_id' => '1',
+            'profile'    => null,
+        ];
+
+        $id = $model->with('profile')->insert($data);
+
+        $this->assertIsNumeric($id);
+
+        // Verify user was created but profile was not
+        $user = $model->with('profile')->find($id);
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertSame('Test User', $user->username);
+        $this->assertNull($user->profile);
+    }
+
+    public function testSaveEmptyArrayRelationOneToManySkipsInsert()
+    {
+        $model = model(UserModel::class);
+        $data  = [
+            'username'   => 'Test User',
+            'company_id' => '2',
+            'country_id' => '1',
+            'posts'      => [],
+        ];
+
+        $id = $model->with('posts')->insert($data);
+
+        $this->assertIsNumeric($id);
+
+        // Verify user was created but no posts were created
+        $user = $model->with('posts')->find($id);
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertSame('Test User', $user->username);
+        $this->assertSame([], $user->posts);
+    }
 }

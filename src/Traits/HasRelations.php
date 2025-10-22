@@ -302,7 +302,14 @@ trait HasRelations
         }
 
         foreach ($this->relations as $relationObject) {
-            foreach ($relationObject->getData() as $row) {
+            $data = $relationObject->getData();
+
+            // Skip if data is null or empty - nothing to insert
+            if ($data === [null] || $data === []) {
+                continue;
+            }
+
+            foreach ($data as $row) {
                 $row    = $this->transformDataToArray($row, 'insert');
                 $result = $relationObject->applyWith()->model->insert(array_merge($row, [
                     $relationObject->foreignKey => $eventData[$this->primaryKey],
@@ -349,7 +356,14 @@ trait HasRelations
         }
 
         foreach ($this->relations as $relationObject) {
-            foreach ($relationObject->getData() as $row) {
+            $data = $relationObject->getData();
+
+            // Skip if data is null or empty - nothing to update
+            if ($data === [null] || $data === []) {
+                continue;
+            }
+
+            foreach ($data as $row) {
                 $row = $this->transformDataToArray($row, 'insert');
 
                 foreach ($eventData[$this->primaryKey] as $id) {
@@ -432,11 +446,9 @@ trait HasRelations
 
         $relation->applyWith()->applyRelation($id, $this->primaryKey)->applyConditions();
 
-        $results = in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true) ?
-            $relation->model->first() :
-            $relation->model->findAll();
-
-        return $relation->filterResults($results, $this->tempReturnType);
+        return in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true) ?
+            $relation->filterResult($relation->model->first(), $this->tempReturnType) :
+            $relation->filterResults($relation->model->findAll(), $this->tempReturnType);
     }
 
     /**
