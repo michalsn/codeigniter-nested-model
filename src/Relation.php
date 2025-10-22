@@ -260,9 +260,9 @@ class Relation
         return $refProp->getValue($model);
     }
 
-    public function filterResult(array|Entity $row, string $returnType): array|Entity
+    public function filterResult(array|Entity|null $row, string $returnType): array|Entity|null
     {
-        if ($row === [] || $this->type !== RelationTypes::belongsToMany) {
+        if ($row === [] || $row === null || $this->type !== RelationTypes::belongsToMany) {
             return $row;
         }
 

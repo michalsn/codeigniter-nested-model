@@ -19,6 +19,12 @@ parameters:
 			path: tests/EntityTest.php
 
 		-
+			message: '#^Cannot access property \$profile on array\<int\|string, array\<int\|string, bool\|float\|int\|object\|string\|null\>\|bool\|float\|int\|object\|string\|null\>\|object\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: tests/EntityTest.php
+
+		-
 			message: '#^Cannot access property \$user_id on array\|bool\|float\|int\|object\|string\.$#'
 			identifier: property.nonObject
 			count: 1
