@@ -228,7 +228,7 @@ trait HasRelations
         $tables = [$table1, $table2];
         sort($tables);
 
-        $tables = array_map('singular', $tables);
+        $tables = array_map(singular(...), $tables);
 
         return implode('_', $tables);
     }
@@ -483,7 +483,7 @@ trait HasRelations
                     ),
                     'LEFT',
                 )
-                ->where('relation1.' . $relation->primaryKey, null)
+                ->where('relation1.' . $relation->primaryKey)
                 ->findAll();
         } else {
             $results = $relation->model->findAll();

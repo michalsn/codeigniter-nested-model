@@ -37,7 +37,7 @@ class UuidPostModel extends Model
     // Transform user IDs to uppercase for user relation
     protected function transformUserRelationIds(array $ids): array
     {
-        return array_map('strtoupper', $ids);
+        return array_map(strtoupper(...), $ids);
     }
 
     // Transform post IDs to binary for comments relation

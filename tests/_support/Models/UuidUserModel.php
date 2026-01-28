@@ -43,6 +43,6 @@ class UuidUserModel extends Model
     // Transform UUIDs to uppercase for posts relation
     protected function transformPostsRelationIds(array $ids): array
     {
-        return array_map('strtoupper', $ids);
+        return array_map(strtoupper(...), $ids);
     }
 }
