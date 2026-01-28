@@ -2,6 +2,10 @@
 
 A simple model relations for CodeIgniter 4 framework.
 
+> [!NOTE]
+> Consider switching to [CodeIgniter Relations](https://github.com/michalsn/codeigniter-relations) package -
+> especially if you're starting a new project.
+
 [![PHPUnit](https://github.com/michalsn/codeigniter-nested-model/actions/workflows/phpunit.yml/badge.svg)](https://github.com/michalsn/codeigniter-nested-model/actions/workflows/phpunit.yml)
 [![PHPStan](https://github.com/michalsn/codeigniter-nested-model/actions/workflows/phpstan.yml/badge.svg)](https://github.com/michalsn/codeigniter-nested-model/actions/workflows/phpstan.yml)
 [![Deptrac](https://github.com/michalsn/codeigniter-nested-model/actions/workflows/deptrac.yml/badge.svg)](https://github.com/michalsn/codeigniter-nested-model/actions/workflows/deptrac.yml)
