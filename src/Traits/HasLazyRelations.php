@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Michalsn\CodeIgniterNestedModel\Traits;
 
 use CodeIgniter\Autoloader\FileLocatorInterface;
+use CodeIgniter\Model;
 use Michalsn\CodeIgniterNestedModel\Enums\RelationTypes;
 
 trait HasLazyRelations
@@ -14,15 +15,20 @@ trait HasLazyRelations
      */
     private array $handledRelations = [];
 
+    private ?Model $relationModel       = null;
+    private bool $relationModelResolved = false;
+
     public function __get(string $key)
     {
         if (array_key_exists($key, $this->attributes)) {
             return parent::__get($key);
         }
 
-        if ($this->isRelation($key)) {
+        $model = $this->getRelationModel();
+
+        if ($model !== null && method_exists($model, $key)) {
             if (! isset($this->handledRelations[$key]) && ! array_key_exists($key, $this->attributes)) {
-                $this->handleRelation($key);
+                $this->handleRelation($key, $model);
                 $this->handledRelations[$key] = true;
             }
 
@@ -35,20 +41,8 @@ trait HasLazyRelations
     /**
      * Load relation for the property.
      */
-    private function handleRelation(string $name)
+    private function handleRelation(string $name, Model $model)
     {
-        $className = $this->findModelClass();
-
-        if ($className === null) {
-            return null;
-        }
-
-        $model = model($className);
-
-        if (! method_exists($model, $name)) {
-            return null;
-        }
-
         $relation = $model->{$name}();
 
         if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true)) {
@@ -72,17 +66,20 @@ trait HasLazyRelations
     }
 
     /**
-     * Check if the property is a declared relation on the matching model.
+     * Resolve the matching model once for the lifetime of the entity instance.
      */
-    private function isRelation(string $name): bool
+    private function getRelationModel(): ?Model
     {
-        $className = $this->findModelClass();
-
-        if ($className === null) {
-            return false;
+        if ($this->relationModelResolved) {
+            return $this->relationModel;
         }
 
-        return method_exists(model($className), $name);
+        $className = $this->findModelClass();
+
+        $this->relationModel         = $className === null ? null : model($className);
+        $this->relationModelResolved = true;
+
+        return $this->relationModel;
     }
 
     /**
