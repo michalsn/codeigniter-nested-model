@@ -16,14 +16,20 @@ trait HasLazyRelations
 
     public function __get(string $key)
     {
-        $result = parent::__get($key);
-
-        if ($result === null && ! isset($this->handledRelations[$key])) {
-            $result                       = $this->handleRelation($key);
-            $this->handledRelations[$key] = true;
+        if (array_key_exists($key, $this->attributes)) {
+            return parent::__get($key);
         }
 
-        return $result;
+        if ($this->isRelation($key)) {
+            if (! isset($this->handledRelations[$key]) && ! array_key_exists($key, $this->attributes)) {
+                $this->handleRelation($key);
+                $this->handledRelations[$key] = true;
+            }
+
+            return $this->attributes[$key] ?? null;
+        }
+
+        return parent::__get($key);
     }
 
     /**
@@ -63,6 +69,20 @@ trait HasLazyRelations
         }
 
         return $this->attributes[$name];
+    }
+
+    /**
+     * Check if the property is a declared relation on the matching model.
+     */
+    private function isRelation(string $name): bool
+    {
+        $className = $this->findModelClass();
+
+        if ($className === null) {
+            return false;
+        }
+
+        return method_exists(model($className), $name);
     }
 
     /**
