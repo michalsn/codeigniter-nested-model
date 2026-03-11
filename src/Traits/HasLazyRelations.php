@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Michalsn\CodeIgniterNestedModel\Traits;
 
 use CodeIgniter\Autoloader\FileLocatorInterface;
+use CodeIgniter\Model;
 use Michalsn\CodeIgniterNestedModel\Enums\RelationTypes;
 
 trait HasLazyRelations
@@ -14,35 +15,34 @@ trait HasLazyRelations
      */
     private array $handledRelations = [];
 
+    private ?Model $relationModel       = null;
+    private bool $relationModelResolved = false;
+
     public function __get(string $key)
     {
-        $result = parent::__get($key);
-
-        if ($result === null && ! isset($this->handledRelations[$key])) {
-            $result                       = $this->handleRelation($key);
-            $this->handledRelations[$key] = true;
+        if (array_key_exists($key, $this->attributes)) {
+            return parent::__get($key);
         }
 
-        return $result;
+        $model = $this->getRelationModel();
+
+        if ($model !== null && method_exists($model, $key)) {
+            if (! isset($this->handledRelations[$key]) && ! array_key_exists($key, $this->attributes)) {
+                $this->handleRelation($key, $model);
+                $this->handledRelations[$key] = true;
+            }
+
+            return $this->attributes[$key] ?? null;
+        }
+
+        return parent::__get($key);
     }
 
     /**
      * Load relation for the property.
      */
-    private function handleRelation(string $name)
+    private function handleRelation(string $name, Model $model)
     {
-        $className = $this->findModelClass();
-
-        if ($className === null) {
-            return null;
-        }
-
-        $model = model($className);
-
-        if (! method_exists($model, $name)) {
-            return null;
-        }
-
         $relation = $model->{$name}();
 
         if (in_array($relation->type, [RelationTypes::hasOne, RelationTypes::belongsTo], true)) {
@@ -63,6 +63,23 @@ trait HasLazyRelations
         }
 
         return $this->attributes[$name];
+    }
+
+    /**
+     * Resolve the matching model once for the lifetime of the entity instance.
+     */
+    private function getRelationModel(): ?Model
+    {
+        if ($this->relationModelResolved) {
+            return $this->relationModel;
+        }
+
+        $className = $this->findModelClass();
+
+        $this->relationModel         = $className === null ? null : model($className);
+        $this->relationModelResolved = true;
+
+        return $this->relationModel;
     }
 
     /**

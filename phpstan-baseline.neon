@@ -124,6 +124,12 @@ parameters:
 			message: '#^Call to an undefined method CodeIgniter\\Model\:\:getTable\(\)\.$#'
 			identifier: method.notFound
 			count: 5
+			path: tests/_support/Models/StrictUserModel.php
+
+		-
+			message: '#^Call to an undefined method CodeIgniter\\Model\:\:getTable\(\)\.$#'
+			identifier: method.notFound
+			count: 5
 			path: tests/_support/Models/StudentModel.php
 
 		-

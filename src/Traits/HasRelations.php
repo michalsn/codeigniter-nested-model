@@ -406,7 +406,13 @@ trait HasRelations
                 }
             } else {
                 foreach ($this->relations as $relationName => $relationObject) {
-                    $eventData['data']->{$relationName} = $this->getDataForRelationById($eventData['data']->{$relationObject->primaryKey}, $relationObject, $relationName);
+                    $relationValue = $this->getDataForRelationById($eventData['data']->{$relationObject->primaryKey}, $relationObject, $relationName);
+
+                    if ($eventData['data'] instanceof Entity) {
+                        $this->setEntityRelation($eventData['data'], $relationName, $relationValue);
+                    } else {
+                        $eventData['data']->{$relationName} = $relationValue;
+                    }
                 }
             }
         } else {
@@ -426,7 +432,13 @@ trait HasRelations
                     if ($this->tempReturnType === 'array') {
                         $data[$relationName] = $relationData[$data[$relationObject->primaryKey]] ?? [];
                     } else {
-                        $data->{$relationName} = $relationData[$data->{$relationObject->primaryKey}] ?? [];
+                        $relationValue = $relationData[$data->{$relationObject->primaryKey}] ?? [];
+
+                        if ($data instanceof Entity) {
+                            $this->setEntityRelation($data, $relationName, $relationValue);
+                        } else {
+                            $data->{$relationName} = $relationValue;
+                        }
                     }
                 }
             }
@@ -435,6 +447,19 @@ trait HasRelations
         $this->resetRelations();
 
         return $eventData;
+    }
+
+    /**
+     * Store relation data on an entity without triggering strict __set() implementations.
+     */
+    private function setEntityRelation(Entity $entity, string $relationName, mixed $value): void
+    {
+        $setter = function (string $name, mixed $relationValue): void {
+            // @phpstan-ignore-next-line bound to Entity scope below
+            $this->attributes[$name] = $relationValue;
+        };
+
+        Closure::bind($setter, $entity, Entity::class)($relationName, $value);
     }
 
     /**
