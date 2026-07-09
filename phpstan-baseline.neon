@@ -13,34 +13,16 @@ parameters:
 			path: src/Relation.php
 
 		-
-			message: '#^Cannot access property \$country on array\|bool\|float\|int\|object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: tests/EntityTest.php
-
-		-
-			message: '#^Cannot access property \$profile on array\<int\|string, array\<int\|string, bool\|float\|int\|object\|string\|null\>\|bool\|float\|int\|object\|string\|null\>\|object\.$#'
+			message: '#^Cannot access property \$profile on array\<mixed\>\|object\.$#'
 			identifier: property.nonObject
 			count: 2
 			path: tests/EntityTest.php
 
 		-
-			message: '#^Cannot access property \$user_id on array\|bool\|float\|int\|object\|string\.$#'
+			message: '#^Cannot access property \$courses on array\<mixed\>\|object\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: tests/EntityTest.php
-
-		-
-			message: '#^Parameter \#1 \$row of method Tests\\Support\\Models\\UserModel\:\:insert\(\) expects array\<int\|string, bool\|float\|int\|object\|string\|null\>\|object\|null, array\<string, array\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/EntityTest.php
-
-		-
-			message: '#^Cannot access property \$country on array\|bool\|float\|int\|object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: tests/ModelTest.php
+			count: 2
+			path: tests/ManyTest.php
 
 		-
 			message: '#^PHPDoc tag @var with type CodeIgniter\\Entity\\Entity is not subtype of native type Tests\\Support\\Entities\\User\.$#'
@@ -49,34 +31,16 @@ parameters:
 			path: tests/ModelTest.php
 
 		-
-			message: '#^Parameter \#1 \$row of method Tests\\Support\\Models\\UserModel\:\:insert\(\) expects array\<int\|string, bool\|float\|int\|object\|string\|null\>\|object\|null, array\<string, array\<string, string\>\|string\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: tests/ModelTest.php
-
-		-
-			message: '#^Parameter \#2 \$row of method Tests\\Support\\Models\\UserModel\:\:update\(\) expects array\<int\|string, bool\|float\|int\|object\|string\|null\>\|object\|null, array\<string, array\<string, string\>\|string\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: tests/ModelTest.php
+			message: '#^Cannot access property \$posts on array\<mixed\>\|object\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/ThroughTest.php
 
 		-
 			message: '#^Call to an undefined method CodeIgniter\\Model\:\:getTable\(\)\.$#'
 			identifier: method.notFound
 			count: 5
 			path: tests/TransformRelationIdsTest.php
-
-		-
-			message: '#^Call to function method_exists\(\) with \$this\(CodeIgniter\\Model@anonymous/tests/TransformRelationIdsTest\.php\:52\) and ''transformAllRelatio…'' will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: tests/TransformRelationIdsTest.php
-
-		-
-			message: '#^Parameter \#1 \$row of method Tests\\Support\\Models\\UserModel\:\:insert\(\) expects array\<int\|string, bool\|float\|int\|object\|string\|null\>\|object\|null, array\<string, array\<int\|string, array\<string, int\|list\<array\<string, int\|string\>\>\|string\>\|string\>\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/_support/Database/Seeds/SeedTests.php
 
 		-
 			message: '#^Call to an undefined method CodeIgniter\\Model\:\:getTable\(\)\.$#'
